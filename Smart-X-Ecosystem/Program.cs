@@ -12,11 +12,11 @@ using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Blazor services
+// Add Blazor services 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddSingleton<IngestionEngine>();
 
-// Register HttpClient for internal API calls
+// Register HttpClient for internal API calls 
 builder.Services.AddScoped(sp => new System.Net.Http.HttpClient { BaseAddress = new Uri("https://localhost:5001") });
 
 var app = builder.Build();
@@ -34,16 +34,16 @@ app.UseAntiforgery();
 app.MapRazorComponents<Smart_X_Ecosystem.Components.App>()
     .AddInteractiveServerRenderMode();
 
-// --- MINIMAL API ENDPOINTS --- //
+// --- MINIMAL API ENDPOINTS --- // 
 
-// 1. Data Ingestion Endpoint
+// 1. Data Ingestion Endpoint 
 app.MapPost("/api/telemetry/power", async (TelemetryPacket<PowerMetric> packet) =>
 {
-    await Task.Delay(50); // Simulate processing
+    await Task.Delay(50); // Simulate processing 
     return Results.Ok(new { Message = "Processed" });
 });
 
-// 2. Encrypted File Upload Endpoint
+// 2. Encrypted File Upload Endpoint 
 app.MapPost("/api/upload", async (IFormFile file) =>
 {
     if (file == null || file.Length == 0) return Results.BadRequest("File is empty.");
@@ -52,7 +52,7 @@ app.MapPost("/api/upload", async (IFormFile file) =>
     Directory.CreateDirectory(uploadPath);
     string filePath = Path.Combine(uploadPath, $"{Guid.NewGuid()}_{file.FileName}.enc");
 
-    // Server-side AES Encryption
+    // Server-side AES Encryption 
     using Aes aesAlg = Aes.Create();
     aesAlg.Key = Convert.FromBase64String("VFVUaGlzSXNBU2VjdXJlMzJCeXRlS2V5Rm9yQUVTQTI=");
     aesAlg.IV = Convert.FromBase64String("VFVUaGlzSXNJVjE2Qnl0ZXM=");
@@ -62,7 +62,6 @@ app.MapPost("/api/upload", async (IFormFile file) =>
     await file.CopyToAsync(cs);
 
     return Results.Ok();
-})
-.DisableAntiforgery(); // Required for raw file uploads in this context
+}).DisableAntiforgery(); // Required for raw file uploads in this context 
 
 app.Run();
