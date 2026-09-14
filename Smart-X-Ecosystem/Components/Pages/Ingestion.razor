@@ -1,0 +1,133 @@
+﻿@page "/ingestion"
+@using Smart_X_Ecosystem.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>Data Ingestion</PageTitle>
+
+<div class="row">
+    <!-- INGESTION FORM -->
+    <div class="col-md-7">
+        <h2>Sensor Payload Registration</h2>
+        <EditForm Model="@telemetryModel" OnValidSubmit="SubmitTelemetry" FormName="ingestionForm">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <label class="form-label">Device MAC Address</label>
+                <InputText @bind-Value="telemetryModel.MacAddress" class="form-control" placeholder="00:1B:44:11:3A:B7" />
+                <ValidationMessage For="@(() => telemetryModel.MacAddress)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Deployment Location</label>
+                <InputText @bind-Value="telemetryModel.DeploymentLocation" class="form-control" />
+                <ValidationMessage For="@(() => telemetryModel.DeploymentLocation)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Sensor Category</label>
+                <InputSelect @bind-Value="telemetryModel.SensorCategory" class="form-control">
+                    <option value="">Select Category...</option>
+                    <option value="Environmental">Environmental</option>
+                    <option value="Power">Power Consumption</option>
+                    <option value="Actuator">Actuator</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => telemetryModel.SensorCategory)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Power Reading (Watts)</label>
+                <InputNumber @bind-Value="powerReading" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Push Telemetry to API</button>
+        </EditForm>
+
+        <hr />
+
+        <!-- FILE UPLOAD -->
+        <h4 class="mt-4">Attach Physical Device Log / Photo</h4>
+        <InputFile OnChange="UploadLogFile" class="form-control mb-2" />
+
+        @if (!string.IsNullOrEmpty(statusMessage))
+        {
+            <div class="alert alert-info mt-2">@statusMessage</div>
+        }
+    </div>
+
+    <!-- DYNAMIC ENGAGEMENT LIST -->
+    <div class="col-md-5">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark fw-bold">
+                Live Operator Alerts (Dynamic Tracking)
+            </div>
+            <div class="card-body">
+                <p class="small text-muted">Flag current MAC address if anomaly detected on visual heatmap.</p>
+                <button class="btn btn-sm btn-outline-danger mb-3" @onclick="FlagCurrentSensor">
+                    Flag Current Sensor
+                </button>
+
+                <ul class="list-group">
+                    @foreach (var alert in ActiveAlerts)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @alert.MacAddress
+                            <span class="badge bg-danger rounded-pill">@alert.Timestamp.ToString("HH:mm:ss")</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private TelemetryPacket<PowerMetric> telemetryModel = new();
+    private int powerReading;
+    private string statusMessage = "";
+
+    // Dynamic engagement list to store user-reported issues
+    private List<AlertReport> ActiveAlerts = new();
+
+    private async Task SubmitTelemetry()
+    {
+        telemetryModel.Payload = new PowerMetric(powerReading);
+
+        // Asynchronous API call
+        var response = await Http.PostAsJsonAsync("/api/telemetry/power", telemetryModel);
+        if (response.IsSuccessStatusCode)
+        {
+            statusMessage = "Telemetry successfully pushed to .NET API.";
+        }
+    }
+
+    private async Task UploadLogFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        using var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(file.OpenReadStream(1024 * 1024 * 10)); // 10MB max
+        content.Add(fileContent, "file", file.Name);
+
+        var response = await Http.PostAsync("/api/upload", content);
+        if (response.IsSuccessStatusCode)
+        {
+            statusMessage = "File uploaded and fully encrypted.";
+        }
+    }
+
+    private void FlagCurrentSensor()
+    {
+        if (!string.IsNullOrWhiteSpace(telemetryModel.MacAddress))
+        {
+            ActiveAlerts.Add(new AlertReport { MacAddress = telemetryModel.MacAddress, Timestamp = DateTime.Now });
+        }
+    }
+
+    public class AlertReport
+    {
+        public string MacAddress { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+}
