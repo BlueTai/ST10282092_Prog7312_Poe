@@ -1,0 +1,28 @@
+﻿@page "/"
+
+<h1>Smart-X Gateway Startup Menu</h1>
+<p>Select an architectural pillar to configure the ecosystem.</p>
+
+<div class="menu-container">
+    <button class="btn btn-primary" @onclick="NavigateToIngestion">
+        Sensor Data Ingestion and Telemetry
+    </button>
+
+    <button class="btn btn-secondary" disabled>
+        Real-Time Command Stream and History (Disabled – Part 2)
+    </button>
+
+    <button class="btn btn-secondary" disabled>
+        Network Topology and Mesh Routing (Disabled – Final PoE)
+    </button>
+</div>
+
+@code {
+    [Inject]
+    public NavigationManager NavManager { get; set; }
+
+    private void NavigateToIngestion()
+    {
+        NavManager.NavigateTo("/ingestion");
+    }
+}
