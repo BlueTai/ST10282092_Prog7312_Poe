@@ -3,21 +3,50 @@
 
 <PageTitle>Smart-X Gateway</PageTitle>
 
-<!-- Rest of your markup -->
-<hr />
+<div class="container text-center mt-5 pt-4">
+    <h1 class="display-5 fw-bold text-primary mb-3">Smart-X IoT Gateway</h1>
+    <p class="lead text-muted mb-5">Select an architectural pillar to configure the ecosystem infrastructure.</p>
 
-<div class="d-flex flex-column gap-3 mt-4" style="max-width: 400px;">
-    <button class="btn btn-primary btn-lg" @onclick="NavigateToIngestion">
-        Sensor Data Ingestion and Telemetry
-    </button>
+    <div class="row justify-content-center gap-4">
+        <!-- Active Pillar -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-primary">
+                <div class="card-body d-flex flex-column py-5">
+                    <h5 class="card-title fw-bold">Sensor Data Ingestion</h5>
+                    <p class="card-text text-muted mb-4">Process varied sensor telemetry types efficiently with encrypted log uploads.</p>
+                    <button class="btn btn-primary mt-auto btn-lg" @onclick="NavigateToIngestion">
+                        Initialize Gateway
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <button class="btn btn-secondary btn-lg" disabled>
-        Real-Time Command Stream and History
-    </button>
+        <!-- Disabled Pillar 1 -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 bg-light text-muted">
+                <div class="card-body d-flex flex-column py-5">
+                    <h5 class="card-title fw-bold">Command Stream</h5>
+                    <p class="card-text mb-4">Real-time command stream and history tracking.</p>
+                    <button class="btn btn-secondary mt-auto btn-lg" disabled>
+                        Disabled (Part 2)
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <button class="btn btn-secondary btn-lg" disabled>
-        Network Topology and Mesh Routing
-    </button>
+        <!-- Disabled Pillar 2 -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 bg-light text-muted">
+                <div class="card-body d-flex flex-column py-5">
+                    <h5 class="card-title fw-bold">Network Topology</h5>
+                    <p class="card-text mb-4">Mesh routing and visual topology configuration.</p>
+                    <button class="btn btn-secondary mt-auto btn-lg" disabled>
+                        Disabled (Final PoE)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @code {
