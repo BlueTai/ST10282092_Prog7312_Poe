@@ -50,7 +50,7 @@ Option 1: Running locally via Visual Studio
 
 Clone this repository to your local machine:
 
-git clone https://github.com/your-username/smart-x-ecosystem.git
+git clone https://github.com/BlueTai/ST10282092_Prog7312_Poe.git
 
 
 Navigate to the project directory and open the solution file:
