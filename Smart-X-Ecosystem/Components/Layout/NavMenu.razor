@@ -1,22 +1,72 @@
-﻿<div class="top-row ps-3 navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Smart-X Ecosystem</a>
+﻿@using Smart_X_Ecosystem.Services
+@inject FirebaseAuthService AuthService
+@implements IDisposable
+
+<div class="sidebar-brand text-white text-decoration-none">
+    <div class="d-flex align-items-center gap-2">
+        <div class="bg-primary rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+            <i class="bi bi-lightning-charge-fill text-white fs-6"></i>
+        </div>
+        <span>Smart-X Cloud</span>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+<div class="nav-scrollable">
     <nav class="flex-column">
-        <div class="nav-item px-3">
+        
+        <div class="sidebar-heading">Portal</div>
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Startup Menu
+                <i class="bi bi-grid-1x2"></i>
+                <span>Home & Auth</span>
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ingestion">
-                <span class="bi bi-cpu-fill-nav-menu" aria-hidden="true"></span> Data Ingestion
-            </NavLink>
-        </div>
+
+        @if (AuthService.IsAuthenticated)
+        {
+            <div class="sidebar-heading mt-4">Active Modules</div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="ingestion">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <span>Data Ingestion</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item">
+                <NavLink class="nav-link" href="command-stream">
+                    <i class="bi bi-activity"></i>
+                    <span>Command Stream</span>
+                </NavLink>
+            </div>
+
+            <div class="sidebar-heading mt-4">Final PoE</div>
+            <div class="nav-item">
+                <span class="nav-link" style="cursor: not-allowed; opacity: 0.4;" title="Locked for Final PoE">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Network Topology</span>
+                    <i class="bi bi-lock-fill ms-auto small"></i>
+                </span>
+            </div>
+        }
+        else
+        {
+            <div class="mt-4 p-3 mx-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10 text-center">
+                <i class="bi bi-shield-lock text-warning fs-4 mb-2 d-block"></i>
+                <span class="small text-white-50">Sign in on the Home page to unlock system modules.</span>
+            </div>
+        }
     </nav>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AuthService.OnAuthStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnAuthStateChanged -= StateHasChanged;
+    }
+}

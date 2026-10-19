@@ -1,0 +1,409 @@
+@page "/command-stream"
+@using Smart_X_Ecosystem.Models
+@using Smart_X_Ecosystem.Services
+@rendermode InteractiveServer
+@inject CommandStreamService StreamService
+@inject FirebaseAuthService AuthService
+@inject NavigationManager NavManager
+@inject HttpClient Http
+
+<PageTitle>Real-Time Command Stream</PageTitle>
+
+@if (!AuthService.IsAuthenticated)
+{
+    <div class="container mt-5">
+        <div class="alert alert-warning shadow-sm">
+            <h5>🔒 Authentication Required</h5>
+            <p class="mb-2">Please authenticate via Firebase on the Home page to access the Real-Time Command Stream.</p>
+            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Go to Login</button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid py-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="fw-bold text-primary mb-0">Real-Time Command Stream & History (Part 2)</h2>
+                <p class="text-muted mb-0">Live Telemetry Gauges, Priority Queues, O(1) DeviceRegistry & Predictive Action Engine</p>
+            </div>
+            <span class="badge bg-success fs-6">Operator: @AuthService.CurrentUserEmail</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(StatusBanner))
+        {
+            <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+                <strong>System Event:</strong> @StatusBanner
+                <button type="button" class="btn-close" @onclick="() => StatusBanner = string.Empty"></button>
+            </div>
+        }
+
+        <!-- 1. PREDICTIVE ACTION & RECOMMENDATION ENGINE (30 MARKS) -->
+        <div class="card border-warning shadow-sm mb-4">
+            <div class="card-header bg-warning bg-opacity-25 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark">⚡ Suggested Actions & Automated Insights (Predictive Engine)</h5>
+                <small class="text-muted">Recorded Interactions: @StreamService.RecordedUserHistory.Count</small>
+            </div>
+            <div class="card-body">
+                @{
+                    var recommendations = StreamService.GetPredictiveRecommendations();
+                }
+                @if (recommendations.Count == 0)
+                {
+                    <p class="text-muted mb-0">All nodes nominal. Simulate a sensor drop or search for a device to generate predictive actions.</p>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach (var rec in recommendations)
+                        {
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded bg-light h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="fw-bold text-danger mb-1">@rec.Title</h6>
+                                            <span class="badge bg-dark">@rec.Confidence</span>
+                                        </div>
+                                        <p class="small text-muted mb-2">@rec.Reason</p>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <code class="small">Target: @rec.TargetMac</code>
+                                        <button class="btn btn-sm btn-warning fw-bold" @onclick="() => ExecuteRecommendedAction(rec)">
+                                            Execute: @rec.SuggestedCommand
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- 2. QUEUES AND STACK CONTROLS (15 MARKS) -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        Live API Telemetry Simulator (TelemetryQueue vs CriticalAlertQueue)
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button class="btn btn-outline-primary btn-sm" @onclick="SimulateStandardPacket">
+                                + Normal Packet (TelemetryQueue)
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="SimulateMoistureDrop">
+                                ⚠️ Moisture Sensor B &lt; 20% (CriticalAlertQueue)
+                            </button>
+                            <button class="btn btn-warning btn-sm text-dark" @onclick="SimulatePowerSpike">
+                                ⚡ 450V Power Spike (CriticalAlertQueue)
+                            </button>
+                            <button class="btn btn-secondary btn-sm" @onclick="SimulateDisconnect">
+                                🔌 Simulate Disconnect (DisconnectedNodes HashSet)
+                            </button>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="p-2 border rounded bg-danger bg-opacity-10 d-flex justify-content-between fw-bold text-danger">
+                                    <span>CriticalAlertQueue (Priority)</span>
+                                    <span>@StreamService.CriticalAlertQueue.Count</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-2 border rounded bg-primary bg-opacity-10 d-flex justify-content-between fw-bold text-primary">
+                                    <span>TelemetryQueue (FIFO)</span>
+                                    <span>@StreamService.TelemetryQueue.Count</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-success w-100 mt-3 fw-bold" @onclick="DequeueNextPacket">
+                            ▶ Dequeue & Process Next Packet (Critical Bypasses Normal Queue)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">CommandUndoStack (Stack&lt;T&gt;)</span>
+                        <button class="btn btn-sm btn-outline-warning" @onclick="UndoLastOverride">
+                            ↩ Undo Last Command (@StreamService.CommandUndoStack.Count)
+                        </button>
+                    </div>
+                    <div class="card-body p-2" style="max-height: 210px; overflow-y: auto;">
+                        @if (StreamService.CommandUndoStack.Count == 0)
+                        {
+                            <p class="text-muted small text-center my-4">CommandUndoStack is empty. Issue a manual override below.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-group list-group-flush small">
+                                @foreach (var cmd in StreamService.CommandUndoStack)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>@cmd.DeviceName</strong>: @cmd.ActionDescription
+                                            <div class="text-muted" style="font-size: 0.75rem;">@cmd.TargetMac | @cmd.IssuedAt.ToLocalTime().ToString("HH:mm:ss")</div>
+                                        </div>
+                                        <span class="badge bg-secondary">FILO</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. DEVICEREGISTRY O(1) TABLE & VISUAL GAUGES -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-4 fw-bold">
+                                DeviceRegistry (O(1) Dictionary)
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" placeholder="Search (e.g. Pump A)..." @bind="SearchQuery" @bind:event="oninput" />
+                                    <button class="btn btn-primary" @onclick="LogSearchPattern">Record Search</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" @bind="SelectedCategory">
+                                    <option value="All">All Categories</option>
+                                    @foreach (var cat in StreamService.ActiveCategoriesSet)
+                                    {
+                                        <option value="@cat">@cat</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" @bind="SelectedAlertFilter">
+                                    <option value="All">All States</option>
+                                    <option value="Online">Online</option>
+                                    <option value="Faulty">Active Alerts</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>MAC (Key)</th>
+                                    <th>Device</th>
+                                    <th>Live Telemetry Gauge</th>
+                                    <th>Status</th>
+                                    <th>Relay</th>
+                                    <th>Manual Override</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var device in FilteredDevices)
+                                {
+                                    double pct = Math.Clamp((device.LastReading / device.MaxGaugeValue) * 100.0, 5.0, 100.0);
+                                    <tr>
+                                        <td><code>@device.MacAddress</code></td>
+                                        <td>
+                                            <div class="fw-bold">@device.DeviceName</div>
+                                            <span class="badge bg-info text-dark">@device.Category</span>
+                                        </td>
+                                        <td style="min-width: 190px;">
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span class="fw-bold">@device.LastReading @device.Unit</span>
+                                                <span class="text-muted">/ @device.MaxGaugeValue @device.Unit</span>
+                                            </div>
+                                            <div class="progress" style="height: 10px;">
+                                                <div class="progress-bar progress-bar-striped progress-bar-animated @(device.Status == "Alert" ? "bg-danger" : device.Status == "Offline" ? "bg-secondary" : "bg-success")"
+                                                     role="progressbar" style="width: @(pct.ToString("0"))%"></div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(device.Status == "Online" ? "bg-success" : device.Status == "Alert" ? "bg-danger" : "bg-secondary")">
+                                                @device.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(device.IsRelayActive ? "bg-primary" : "bg-dark")">
+                                                @(device.IsRelayActive ? "ON" : "OFF")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-dark" @onclick="() => TriggerOverride(device)">
+                                                Toggle Relay
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. UNIQUE HASHSET ERRORS & SORTED EVENT TIMELINE -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-3 border-danger">
+                    <div class="card-header bg-danger text-white fw-bold">
+                        DisconnectedNodes (HashSet&lt;string&gt;)
+                    </div>
+                    <div class="card-body p-2">
+                        @if (StreamService.DisconnectedNodes.Count == 0)
+                        {
+                            <p class="text-success small mb-0">No active error states or disconnected nodes.</p>
+                        }
+                        else
+                        {
+                            <ul class="list-group list-group-flush small">
+                                @foreach (var mac in StreamService.DisconnectedNodes)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center text-danger fw-bold">
+                                        <span>@mac</span>
+                                        <span class="badge bg-danger">Unique Set Item</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white fw-bold">
+                        SensorTimeline (SortedDictionary)
+                    </div>
+                    <div class="card-body p-2" style="max-height: 260px; overflow-y: auto;">
+                        <ul class="list-group list-group-flush small">
+                            @foreach (var entry in StreamService.SensorTimeline.Reverse())
+                            {
+                                <li class="list-group-item px-1 py-1">
+                                    <span class="text-muted fw-bold">[@entry.Key.ToLocalTime().ToString("HH:mm:ss.ff")]</span>
+                                    <span>@entry.Value</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string SearchQuery { get; set; } = string.Empty;
+    private string SelectedCategory { get; set; } = "All";
+    private string SelectedAlertFilter { get; set; } = "All";
+    private string StatusBanner { get; set; } = string.Empty;
+
+    private IEnumerable<DeviceState> FilteredDevices => StreamService.DeviceRegistry.Values
+        .Where(d => string.IsNullOrWhiteSpace(SearchQuery) ||
+                    d.DeviceName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                    d.MacAddress.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase))
+        .Where(d => SelectedCategory == "All" || d.Category.Equals(SelectedCategory, StringComparison.OrdinalIgnoreCase))
+        .Where(d => SelectedAlertFilter == "All" ||
+                    (SelectedAlertFilter == "Online" && d.Status == "Online") ||
+                    (SelectedAlertFilter == "Faulty" && StreamService.DisconnectedNodes.Contains(d.MacAddress)));
+
+    private void LogSearchPattern()
+    {
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            StreamService.RecordUserSearch(SearchQuery);
+            StatusBanner = $"Recorded search '{SearchQuery}' in Predictive Action Engine history.";
+        }
+    }
+
+    private async Task SimulateStandardPacket()
+    {
+        var req = new TelemetrySimulationRequest
+        {
+            MacAddress = "00:1B:44:11:3A:D9",
+            Reading = Math.Round(21.0 + Random.Shared.NextDouble() * 6.0, 1),
+            IsCriticalAlert = false
+        };
+        await Http.PostAsJsonAsync("/api/stream/simulate", req);
+        StatusBanner = "Normal telemetry sent to API and queued in TelemetryQueue.";
+    }
+
+    private async Task SimulateMoistureDrop()
+    {
+        var req = new TelemetrySimulationRequest
+        {
+            MacAddress = "00:1B:44:11:3A:B7",
+            Reading = 14.5,
+            IsCriticalAlert = true
+        };
+        await Http.PostAsJsonAsync("/api/stream/simulate", req);
+        StatusBanner = "Moisture Sensor B dropped to 14.5% (< 20%)! Added to CriticalAlertQueue & triggered Suggested Action for Pump A.";
+    }
+
+    private async Task SimulatePowerSpike()
+    {
+        var req = new TelemetrySimulationRequest
+        {
+            MacAddress = "00:1B:44:11:3A:C2",
+            Reading = 450.0,
+            IsCriticalAlert = true
+        };
+        await Http.PostAsJsonAsync("/api/stream/simulate", req);
+        StatusBanner = "450V surge sent to API! Enqueued in CriticalAlertQueue (Priority 1).";
+    }
+
+    private async Task SimulateDisconnect()
+    {
+        var req = new TelemetrySimulationRequest
+        {
+            MacAddress = "00:1B:44:11:3A:C1",
+            Reading = 0,
+            SimulateDisconnect = true
+        };
+        var res = await Http.PostAsJsonAsync("/api/stream/simulate", req);
+        var payload = await res.Content.ReadFromJsonAsync<ApiMessage>();
+        StatusBanner = payload?.Message ?? "Disconnect processed.";
+    }
+
+    private void DequeueNextPacket()
+    {
+        StatusBanner = StreamService.ProcessNextQueuedItem();
+    }
+
+    private async Task TriggerOverride(DeviceState device)
+    {
+        var cmd = new OverrideCommand
+        {
+            TargetMac = device.MacAddress,
+            DeviceName = device.DeviceName,
+            ActionDescription = $"Toggled Relay to {(!device.IsRelayActive ? "ON" : "OFF")}"
+        };
+        await Http.PostAsJsonAsync("/api/stream/override", cmd);
+        StatusBanner = $"Override executed on {device.DeviceName} and pushed to CommandUndoStack.";
+    }
+
+    private async Task UndoLastOverride()
+    {
+        var res = await Http.PostAsync("/api/stream/undo", null);
+        var payload = await res.Content.ReadFromJsonAsync<ApiMessage>();
+        StatusBanner = payload?.Message ?? "Undo operation completed safely.";
+    }
+
+    private async Task ExecuteRecommendedAction(PredictiveRecommendation rec)
+    {
+        var cmd = new OverrideCommand
+        {
+            TargetMac = rec.TargetMac,
+            DeviceName = rec.Title,
+            ActionDescription = rec.SuggestedCommand
+        };
+        await Http.PostAsJsonAsync("/api/stream/override", cmd);
+        StatusBanner = $"Executed Suggested Action: '{rec.SuggestedCommand}' on {rec.TargetMac}.";
+    }
+
+    private class ApiMessage
+    {
+        public string Message { get; set; } = string.Empty;
+    }
+}

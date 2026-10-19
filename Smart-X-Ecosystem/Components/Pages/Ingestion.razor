@@ -1,127 +1,211 @@
 ﻿@page "/ingestion"
+@rendermode InteractiveServer
 @using Smart_X_Ecosystem.Models
+@using Smart_X_Ecosystem.Services
+@using System.Net.Http.Headers
 @using System.Net.Http.Json
 @inject HttpClient Http
+@inject IngestionEngine Engine
+@inject CommandStreamService StreamService
+@inject FirebaseAuthService AuthService
+@inject NavigationManager NavManager
 
-<PageTitle>Data Ingestion</PageTitle>
+<PageTitle>Sensor Data Ingestion & Batch Provisioning</PageTitle>
 
-<div class="row">
-    <!-- INGESTION FORM -->
-    <div class="col-md-7">
-        <h2>Sensor Payload Registration</h2>
-        <EditForm Model="@telemetryModel" OnValidSubmit="SubmitTelemetry" FormName="ingestionForm">
-            <DataAnnotationsValidator />
-
-            <div class="mb-3">
-                <label class="form-label">Device MAC Address</label>
-                <InputText @bind-Value="telemetryModel.MacAddress" class="form-control" placeholder="00:1B:44:11:3A:B7" />
-                <ValidationMessage For="@(() => telemetryModel.MacAddress)" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Deployment Location</label>
-                <InputText @bind-Value="telemetryModel.DeploymentLocation" class="form-control" />
-                <ValidationMessage For="@(() => telemetryModel.DeploymentLocation)" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Sensor Category</label>
-                <InputSelect @bind-Value="telemetryModel.SensorCategory" class="form-control">
-                    <option value="">Select Category...</option>
-                    <option value="Environmental">Environmental</option>
-                    <option value="Power">Power Consumption</option>
-                    <option value="Actuator">Actuator</option>
-                </InputSelect>
-                <ValidationMessage For="@(() => telemetryModel.SensorCategory)" class="text-danger" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Power Reading (Watts)</label>
-                <InputNumber @bind-Value="powerReading" class="form-control" />
-            </div>
-
-            <button type="submit" class="btn btn-success">Push Telemetry to API</button>
-        </EditForm>
-
-        <hr />
-
-        <!-- FILE UPLOAD -->
-        <h4 class="mt-4">Attach Physical Device Log / Photo</h4>
-        <InputFile OnChange="UploadLogFile" class="form-control mb-2" />
-
-        @if (!string.IsNullOrEmpty(statusMessage))
-        {
-            <div class="alert alert-info mt-2">@statusMessage</div>
-        }
+@if (!AuthService.IsAuthenticated)
+{
+    <div class="container mt-5">
+        <div class="alert alert-warning shadow-sm">
+            <h5>🔒 Authentication Required</h5>
+            <p class="mb-2">You must sign in via Firebase Authentication before accessing the Smart-X Ingestion Gateway.</p>
+            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Return to Login</button>
+        </div>
     </div>
+}
+else
+{
+    <div class="container py-3">
+        <h2 class="fw-bold text-primary mb-1">Sensor Data Ingestion & Telemetry (Part 1)</h2>
+        <p class="text-muted mb-4">Generic Packet Validation, Automated .TXT Device Extraction & AES-256 Encrypted Archiving</p>
 
-    <!-- DYNAMIC ENGAGEMENT LIST -->
-    <div class="col-md-5">
-        <div class="card border-warning">
-            <div class="card-header bg-warning text-dark fw-bold">
-                Live Operator Alerts (Dynamic Tracking)
+        @if (!string.IsNullOrEmpty(StatusMessage))
+        {
+            <div class="alert alert-info shadow-sm">@StatusMessage</div>
+        }
+
+        <div class="row g-4 mb-4">
+            <!-- PUSH SINGLE TELEMETRY PACKET -->
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white fw-bold">Push Single Telemetry Packet</div>
+                    <div class="card-body">
+                        <EditForm Model="@CurrentPacket" OnValidSubmit="@SubmitTelemetry">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger small" />
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Device MAC Address:</label>
+                                <InputText @bind-Value="CurrentPacket.MacAddress" class="form-control" placeholder="00:1B:44:11:3A:B7" />
+                                <ValidationMessage For="@(() => CurrentPacket.MacAddress)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Deployment Zone:</label>
+                                <InputText @bind-Value="CurrentPacket.DeploymentLocation" class="form-control" placeholder="Sector 7G" />
+                                <ValidationMessage For="@(() => CurrentPacket.DeploymentLocation)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Sensor Category:</label>
+                                <InputSelect @bind-Value="CurrentPacket.SensorCategory" class="form-select">
+                                    <option value="">Select Category...</option>
+                                    <option value="Power">Power Metric</option>
+                                    <option value="Hydroponics">Hydroponics Moisture</option>
+                                    <option value="HVAC">HVAC Thermal</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => CurrentPacket.SensorCategory)" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Voltage / Sensor Value:</label>
+                                <InputNumber @bind-Value="CurrentVoltage" class="form-control" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">Push Telemetry to API</button>
+                        </EditForm>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="small text-muted">Flag current MAC address if anomaly detected on visual heatmap.</p>
-                <button class="btn btn-sm btn-outline-danger mb-3" @onclick="FlagCurrentSensor">
-                    Flag Current Sensor
-                </button>
 
-                <ul class="list-group">
-                    @foreach (var alert in ActiveAlerts)
-                    {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            @alert.MacAddress
-                            <span class="badge bg-danger rounded-pill">@alert.Timestamp.ToString("HH:mm:ss")</span>
-                        </li>
-                    }
-                </ul>
+            <!-- BATCH .TXT FILE PROVISIONING -->
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-3 border-success">
+                    <div class="card-header bg-success text-white fw-bold">
+                        📄 Batch IoT Device Provisioning (.txt Upload & AES-256 Encryption)
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-2">
+                            Upload a <code>.txt</code> file containing IoT devices (Format per line: <code>MAC,DeviceName,Category,Reading,Unit</code>). The system extracts the devices, loads them into <code>DeviceRegistry</code>, and saves an AES-256 encrypted log.
+                        </p>
+                        <div class="p-2 bg-light border rounded small font-monospace mb-3">
+                            00:1B:44:99:AA:01,Nutrient Dosing Pump,Hydroponics,78.5,%<br />
+                            00:1B:44:99:AA:02,Solar Inverter B,Power,242.0,V<br />
+                            00:1B:44:99:AA:03,Cooling Fan Array,HVAC,19.5,°C
+                        </div>
+                        <InputFile OnChange="@HandleFileUpload" class="form-control" accept=".txt,.csv,.log" />
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark fw-bold">Live Operator Alerts</div>
+                    <div class="card-body">
+                        <button class="btn btn-sm btn-danger mb-2" @onclick="ReportCurrentSensor">Flag Current Sensor</button>
+                        <ul class="list-group small">
+                            @foreach (var alert in ActiveAlerts)
+                            {
+                                <li class="list-group-item list-group-item-danger">
+                                    <strong>@alert.MacAddress</strong> flagged at @alert.Timestamp.ToLocalTime().ToString("HH:mm:ss")
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SYNCHRONIZED LIVE DEVICE GRID -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Synchronized System Device Grid (DeviceRegistry: @StreamService.DeviceRegistry.Count Devices)</span>
+                <button class="btn btn-sm btn-success" @onclick='() => NavManager.NavigateTo("/command-stream")'>
+                    View in Part 2 Command Stream →
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>MAC Address</th>
+                            <th>Device Name</th>
+                            <th>Category</th>
+                            <th>Live Reading & Visual Gauge</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var dev in StreamService.DeviceRegistry.Values)
+                        {
+                            double pct = Math.Clamp((dev.LastReading / dev.MaxGaugeValue) * 100.0, 5.0, 100.0);
+                            <tr>
+                                <td><code>@dev.MacAddress</code></td>
+                                <td class="fw-bold">@dev.DeviceName</td>
+                                <td><span class="badge bg-info text-dark">@dev.Category</span></td>
+                                <td style="min-width: 220px;">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span>@dev.LastReading @dev.Unit</span>
+                                        <span class="text-muted">Max: @dev.MaxGaugeValue @dev.Unit</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar @(dev.Status == "Alert" ? "bg-danger" : "bg-success")" style="width: @(pct.ToString("0"))%"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge @(dev.Status == "Online" ? "bg-success" : "bg-danger")">@dev.Status</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</div>
+}
 
 @code {
-    private TelemetryPacket<PowerMetric> telemetryModel = new();
-    private int powerReading;
-    private string statusMessage = "";
-
-    // Dynamic engagement list to store user-reported issues
-    private List<AlertReport> ActiveAlerts = new();
+    private TelemetryPacket<PowerMetric> CurrentPacket { get; set; } = new() { Payload = new PowerMetric(230, 5) };
+    private double CurrentVoltage { get; set; } = 230.0;
+    private string StatusMessage { get; set; } = string.Empty;
+    private List<AlertReport> ActiveAlerts { get; set; } = new();
 
     private async Task SubmitTelemetry()
     {
-        telemetryModel.Payload = new PowerMetric(powerReading);
-
-        // Asynchronous API call
-        var response = await Http.PostAsJsonAsync("/api/telemetry/power", telemetryModel);
+        CurrentPacket.Payload = new PowerMetric(CurrentVoltage, 5.0);
+        Engine.RecordBurst(new[] { CurrentVoltage, CurrentPacket.Payload.Kilowatts });
+        var response = await Http.PostAsJsonAsync("/api/telemetry/power", CurrentPacket);
         if (response.IsSuccessStatusCode)
         {
-            statusMessage = "Telemetry successfully pushed to .NET API.";
+            StatusMessage = $"Telemetry Packet from {CurrentPacket.MacAddress} ingested into TelemetryQueue & DeviceRegistry.";
+            CurrentPacket = new() { Payload = new PowerMetric(230, 5) };
         }
     }
 
-    private async Task UploadLogFile(InputFileChangeEventArgs e)
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
         var file = e.File;
         if (file == null) return;
 
         using var content = new MultipartFormDataContent();
-        var fileContent = new StreamContent(file.OpenReadStream(1024 * 1024 * 10)); // 10MB max
+        var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5));
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
         content.Add(fileContent, "file", file.Name);
 
         var response = await Http.PostAsync("/api/upload", content);
         if (response.IsSuccessStatusCode)
         {
-            statusMessage = "File uploaded and fully encrypted.";
+            StatusMessage = $"File '{file.Name}' parsed! Extracted devices loaded into DeviceRegistry grid and encrypted archive saved.";
+        }
+        else
+        {
+            StatusMessage = "File upload failed.";
         }
     }
 
-    private void FlagCurrentSensor()
+    private void ReportCurrentSensor()
     {
-        if (!string.IsNullOrWhiteSpace(telemetryModel.MacAddress))
+        if (!string.IsNullOrWhiteSpace(CurrentPacket.MacAddress))
         {
-            ActiveAlerts.Add(new AlertReport { MacAddress = telemetryModel.MacAddress, Timestamp = DateTime.Now });
+            ActiveAlerts.Add(new AlertReport { MacAddress = CurrentPacket.MacAddress, Timestamp = DateTime.UtcNow });
+            StreamService.DisconnectedNodes.Add(CurrentPacket.MacAddress);
         }
     }
 

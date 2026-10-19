@@ -39,11 +39,15 @@ app.MapRazorComponents<Smart_X_Ecosystem.Components.App>()
 app.MapPost("/api/telemetry/power", async (TelemetryPacket<PowerMetric> packet, CommandStreamService streamService) =>
 {
     await Task.Delay(50);
+    double reading = packet.Payload.Voltage > 0
+        ? packet.Payload.Voltage
+        : (packet.Payload.Wattage > 0 ? packet.Payload.Wattage : 230.0);
+
     string status = streamService.IngestDeviceTelemetry(new TelemetrySimulationRequest
     {
         MacAddress = packet.MacAddress,
-        Reading = packet.Payload?.Voltage ?? 230.0,
-        IsCriticalAlert = (packet.Payload?.Voltage ?? 0) > 380.0
+        Reading = reading,
+        IsCriticalAlert = reading > 380.0
     });
     return Results.Ok(new { Message = status });
 });

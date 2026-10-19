@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Smart-X-Ecosystem/1.0.0": {
+        "runtime": {
+          "Smart-X-Ecosystem.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Smart-X-Ecosystem/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
