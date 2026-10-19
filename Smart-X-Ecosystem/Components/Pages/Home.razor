@@ -1,57 +1,189 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using Smart_X_Ecosystem.Services
 @inject NavigationManager NavManager
+@inject FirebaseAuthService AuthService
+@inject CommandStreamService StreamService
 
-<PageTitle>Smart-X Gateway</PageTitle>
+<PageTitle>Smart-X Enterprise IoT Platform</PageTitle>
 
-<div class="container text-center mt-5 pt-4">
-    <h1 class="display-5 fw-bold text-primary mb-3">Smart-X IoT Gateway</h1>
-    <p class="lead text-muted mb-5">Select an architectural pillar to configure the ecosystem infrastructure.</p>
-
-    <div class="row justify-content-center gap-4">
-        <!-- Active Pillar -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 border-primary">
-                <div class="card-body d-flex flex-column py-5">
-                    <h5 class="card-title fw-bold">Sensor Data Ingestion</h5>
-                    <p class="card-text text-muted mb-4">Process varied sensor telemetry types efficiently with encrypted log uploads.</p>
-                    <button class="btn btn-primary mt-auto btn-lg" @onclick="NavigateToIngestion">
-                        Initialize Gateway
-                    </button>
+<div class="container-fluid py-4">
+    <!-- HERO HEADER -->
+    <div class="p-4 p-md-5 mb-4 text-white rounded-3 shadow" style="background: linear-gradient(135deg, #0b192c 0%, #1e3e62 60%, #000000 100%);">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-info bg-opacity-25 border border-info mb-3">
+                    <span class="spinner-grow spinner-grow-sm text-info" role="status"></span>
+                    <small class="fw-bold text-info">SMART-X INDUSTRIAL TELEMETRY & CONTROL ENGINE v2.4</small>
+                </div>
+                <h1 class="display-5 fw-bold mb-3">Next-Gen Edge Microcontroller & Smart Grid Orchestration</h1>
+                <p class="lead text-light opacity-75 mb-4">
+                    Unified real-time ingestion, AES-256 encrypted batch provisioning, O(1) device state indexing, and automated anomaly response across distributed ESP32 sensor arrays.
+                </p>
+                <div class="d-flex flex-wrap gap-4 text-center">
+                    <div class="px-3 py-2 rounded bg-white bg-opacity-10">
+                        <div class="h4 fw-bold text-info mb-0">@StreamService.DeviceRegistry.Count</div>
+                        <small class="text-white-50">Registered Nodes</small>
+                    </div>
+                    <div class="px-3 py-2 rounded bg-white bg-opacity-10">
+                        <div class="h4 fw-bold text-warning mb-0">@StreamService.CriticalAlertQueue.Count</div>
+                        <small class="text-white-50">Priority Alerts</small>
+                    </div>
+                    <div class="px-3 py-2 rounded bg-white bg-opacity-10">
+                        <div class="h4 fw-bold text-success mb-0">99.98%</div>
+                        <small class="text-white-50">Mesh Uptime</small>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Disabled Pillar 1 -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 bg-light text-muted">
-                <div class="card-body d-flex flex-column py-5">
-                    <h5 class="card-title fw-bold">Command Stream</h5>
-                    <p class="card-text mb-4">Real-time command stream and history tracking.</p>
-                    <button class="btn btn-secondary mt-auto btn-lg" disabled>
-                        Disabled (Part 2)
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Disabled Pillar 2 -->
-        <div class="col-md-4">
-            <div class="card shadow-sm h-100 bg-light text-muted">
-                <div class="card-body d-flex flex-column py-5">
-                    <h5 class="card-title fw-bold">Network Topology</h5>
-                    <p class="card-text mb-4">Mesh routing and visual topology configuration.</p>
-                    <button class="btn btn-secondary mt-auto btn-lg" disabled>
-                        Disabled (Final PoE)
-                    </button>
-                </div>
+            <!-- PRODUCT TOPOLOGY SVG -->
+            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+                <svg width="340" height="220" viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="10" y="10" width="320" height="200" rx="16" fill="#0f2537" stroke="#00d2ff" stroke-width="2"/>
+                    <circle cx="70" cy="65" r="22" fill="#198754" stroke="#fff" stroke-width="2"/>
+                    <text x="70" y="70" fill="#fff" font-size="10" font-family="Arial" text-anchor="middle">ESP32-A</text>
+                    <circle cx="70" cy="155" r="22" fill="#dc3545" stroke="#fff" stroke-width="2"/>
+                    <text x="70" y="160" fill="#fff" font-size="10" font-family="Arial" text-anchor="middle">ESP32-B</text>
+                    <rect x="140" y="75" width="75" height="70" rx="10" fill="#0d6efd" stroke="#fff" stroke-width="2"/>
+                    <text x="177" y="108" fill="#fff" font-size="11" font-weight="bold" font-family="Arial" text-anchor="middle">SMART-X</text>
+                    <text x="177" y="124" fill="#fff" font-size="9" font-family="Arial" text-anchor="middle">API GATEWAY</text>
+                    <circle cx="275" cy="110" r="26" fill="#ffc107" stroke="#fff" stroke-width="2"/>
+                    <text x="275" y="114" fill="#000" font-size="10" font-weight="bold" font-family="Arial" text-anchor="middle">CLOUD</text>
+                    <line x1="92" y1="65" x2="140" y2="95" stroke="#00d2ff" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="92" y1="155" x2="140" y2="125" stroke="#ff4d4d" stroke-width="2" stroke-dasharray="4"/>
+                    <line x1="215" y1="110" x2="249" y2="110" stroke="#00ff88" stroke-width="3"/>
+                </svg>
             </div>
         </div>
     </div>
+
+    <!-- FIREBASE AUTHENTICATION PORTAL -->
+    @if (!AuthService.IsAuthenticated)
+    {
+        <div class="row justify-content-center my-4">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow border-primary">
+                    <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                        <span>🔐 Firebase Operator Authentication</span>
+                        <span class="badge bg-light text-primary">REST API</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="small text-muted mb-3">
+                            Authenticate via Google Firebase Identity Toolkit API to unlock the Smart-X Ingestion and Command Stream modules.
+                        </p>
+
+                        @if (!string.IsNullOrEmpty(AuthMessage))
+                        {
+                            <div class="alert @(AuthSuccess ? "alert-success" : "alert-danger") small py-2">
+                                @AuthMessage
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Operator Email</label>
+                            <input type="email" class="form-control" placeholder="operator@smartx.io" @bind="Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Password (min 6 chars)</label>
+                            <input type="password" class="form-control" placeholder="••••••••" @bind="Password" />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary fw-bold" @onclick="HandleSignIn" disabled="@IsBusy">
+                                @(IsBusy ? "Contacting Firebase API..." : "Sign In with Firebase")
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="HandleSignUp" disabled="@IsBusy">
+                                New Operator? Register Account in Firebase
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success d-flex justify-content-between align-items-center shadow-sm mb-4">
+            <div>
+                <strong>✅ Authenticated via Firebase:</strong> Logged in as <code>@AuthService.CurrentUserEmail</code>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" @onclick="AuthService.SignOut">Sign Out</button>
+        </div>
+
+        <div class="row justify-content-center g-4">
+            <!-- Module 1: Sensor Data Ingestion -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-primary">
+                    <div class="card-body d-flex flex-column py-4">
+                        <span class="badge bg-primary align-self-start mb-2">Module 1 — Active (Part 1)</span>
+                        <h5 class="card-title fw-bold">Sensor Data Ingestion and Telemetry</h5>
+                        <p class="card-text text-muted mb-4">
+                            Validate incoming ESP32 telemetry packets, process `.txt` batch device uploads into the live grid, and apply AES-256 log encryption.
+                        </p>
+                        <button class="btn btn-primary mt-auto fw-bold" @onclick='() => NavManager.NavigateTo("/ingestion")'>
+                            Open Ingestion & Batch Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2: Real-Time Command Stream -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 border-success">
+                    <div class="card-body d-flex flex-column py-4">
+                        <span class="badge bg-success align-self-start mb-2">Module 2 — Active (Part 2)</span>
+                        <h5 class="card-title fw-bold">Real-Time Command Stream and History</h5>
+                        <p class="card-text text-muted mb-4">
+                            Live telemetry gauges, FIFO & Priority queues, O(1) dictionary lookups, FILO command undo stack, and Predictive Action Engine.
+                        </p>
+                        <button class="btn btn-success mt-auto fw-bold" @onclick='() => NavManager.NavigateTo("/command-stream")'>
+                            Launch Command Stream
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 3: Network Topology (PoE) -->
+            <div class="col-md-4">
+                <div class="card shadow-sm h-100 bg-light text-muted" style="opacity: 0.7;">
+                    <div class="card-body d-flex flex-column py-4">
+                        <span class="badge bg-secondary align-self-start mb-2">Module 3 — Final PoE</span>
+                        <h5 class="card-title fw-bold">Network Topology and Mesh Routing</h5>
+                        <p class="card-text mb-4">
+                            Graph-based mesh routing, shortest-path failover calculation, and spatial node topology mapping.
+                        </p>
+                        <button class="btn btn-secondary mt-auto" disabled>
+                            Locked for Final PoE
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
-    private void NavigateToIngestion()
+    private string Email { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+    private string AuthMessage { get; set; } = string.Empty;
+    private bool AuthSuccess { get; set; }
+    private bool IsBusy { get; set; }
+
+    private async Task HandleSignIn()
     {
-        NavManager.NavigateTo("/ingestion");
+        IsBusy = true;
+        var result = await AuthService.SignInAsync(Email, Password);
+        AuthSuccess = result.Success;
+        AuthMessage = result.Message;
+        IsBusy = false;
+    }
+
+    private async Task HandleSignUp()
+    {
+        IsBusy = true;
+        var result = await AuthService.SignUpAsync(Email, Password);
+        AuthSuccess = result.Success;
+        AuthMessage = result.Message;
+        IsBusy = false;
     }
 }
