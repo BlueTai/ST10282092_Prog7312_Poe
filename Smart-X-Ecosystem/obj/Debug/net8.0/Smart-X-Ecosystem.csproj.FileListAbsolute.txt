@@ -1,0 +1,7 @@
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.AssemblyInfoInputs.cache
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.AssemblyInfo.cs
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.csproj.CoreCompileInputs.cache
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.sourcelink.json

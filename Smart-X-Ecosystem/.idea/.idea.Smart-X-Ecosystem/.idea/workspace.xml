@@ -16,10 +16,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="40aa5b2c-bed6-43a0-9382-494d1bb60f18" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Models/CommandModels.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Services/CommandStreamService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Services/FirebaseAuthService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/IngestionEngine.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/IngestionEngine.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Smart-X-Ecosystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Smart-X-Ecosystem/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Routes.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Routes.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/_Imports.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +53,65 @@
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.285829375753783" />
+      <entry key="MS500" value="3.295390697068242" />
+      <entry key="S2" value="8.511383312544032" />
+      <entry key="S5" value="14.746028717373983" />
+      <entry key="S10" value="19.316087283460632" />
+      <entry key="S30" value="23.95403349677674" />
+      <entry key="S60" value="25.404585922793387" />
+      <entry key="M2" value="26.18313938420628" />
+      <entry key="M5" value="26.668517411591854" />
+      <entry key="M10" value="26.833456858798037" />
+      <entry key="M15" value="26.88879214078664" />
+      <entry key="M30" value="26.94430629245562" />
+      <entry key="H1" value="26.972130658744643" />
+      <entry key="H2" value="26.98605970211691" />
+      <entry key="H4" value="26.993028443570918" />
+      <entry key="D1" value="26.9988378783869" />
+      <entry key="W1" value="26.999833977837184" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.2230052033875902" />
+      <entry key="MS500" value="3.2597080352923586" />
+      <entry key="S2" value="8.486370194609448" />
+      <entry key="S5" value="14.723492521506603" />
+      <entry key="S10" value="19.29810081803696" />
+      <entry key="S30" value="23.945284760361105" />
+      <entry key="S60" value="25.399740313785205" />
+      <entry key="M2" value="26.180586580349246" />
+      <entry key="M5" value="26.667463394094625" />
+      <entry key="M10" value="26.832924219990478" />
+      <entry key="M15" value="26.888435785982185" />
+      <entry key="M30" value="26.944127481113057" />
+      <entry key="H1" value="26.972041094059854" />
+      <entry key="H2" value="26.9860148799549" />
+      <entry key="H4" value="26.9930060225267" />
+      <entry key="D1" value="26.998834140161726" />
+      <entry key="W1" value="26.999833443771113" />
+    </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0,
