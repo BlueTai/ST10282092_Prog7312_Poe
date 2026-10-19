@@ -1,6 +1,86 @@
-Smart-X Enterprise IoT EcosystemReal-Time Command Orchestration & Predictive Telemetry ProcessingStudent Name: Taahir BassonStudent Number: ST10282092Environment: C# / .NET 8 Blazor Web App & Minimal API1. Architectural OverviewThe Smart-X IoT Ecosystem is a stateful, high-throughput industrial telemetry platform designed for real-time command orchestration. This documentation details the core stream-processing engine, which utilizes advanced data structures and behavioral algorithms to manage live edge-device telemetry.Secure Gateway Authentication: Secures the platform using the Google Firebase Identity Toolkit REST API, establishing zero-trust access without relying on hardcoded credentials.Real-Time Command Stream: A high-performance stream processing engine managing live device states, telemetry queues, and priority alerts.Predictive Action Engine: An automated insight module that cross-references live out-of-range sensor data with historical operator interactions to surface proactive command recommendations.2. Core Data StructuresTo ensure strict $O(1)$ and $O(\log n)$ algorithmic performance across the real-time stream, the backend architecture enforces the following dedicated C# collections:Instance NameC# CollectionAlgorithmic ComplexitySmart-X Implementation PurposeTelemetryQueueQueue<string>$O(1)$ Enqueue / DequeueFirst-In-First-Out (FIFO) processing of standard incoming edge-node telemetry packets.CriticalAlertQueuePriorityQueue<string, int>$O(\log n)$ Enqueue / DequeueMin-heap priority queue ensuring critical alerts (e.g., severe moisture drops or voltage spikes) bypass standard telemetry for immediate processing.CommandUndoStackStack<OverrideCommand>$O(1)$ Push / PopFirst-In-Last-Out (FILO) manual override history allowing safe, instantaneous one-click state restoration.DeviceRegistryDictionary<string, DeviceState>$O(1)$ Average LookupHash table keyed on MAC addresses for instantaneous device telemetry updates, state mutations, and dashboard filtering.SensorTimelineSortedDictionary<DateTime, string>$O(\log n)$ InsertionSelf-balancing binary search tree keyed on UTC timestamps to strictly order and render timeline event logs chronologically.DisconnectedNodesHashSet<string>$O(1)$ Add / ContainsMaintains a unique set of faulty MAC addresses to suppress duplicate alert processing and prevent operator UI fatigue.3. Setup and ExecutionFirebase ConfigurationOpen appsettings.json in the root directory.Insert your Firebase Web API Key:"Firebase": {
+⚡ Smart-X Enterprise IoT Ecosystem
+Real-Time Command Orchestration & Predictive Telemetry Processing Engine
+Developer: Taahir Basson (ST10282092)
+Tech Stack: C# | .NET 8 | Blazor Web App | Minimal API | Docker
+
+1. System Architecture
+The Smart-X IoT Ecosystem is a stateful, high-throughput industrial telemetry platform designed to orchestrate live edge-device data. This repository contains the core stream-processing engine, which utilizes advanced data structures and behavioral algorithms to manage live telemetry, prioritize alerts, and execute real-time hardware commands.
+Secure Zero-Trust Gateway: Secures the platform using the Google Firebase Identity Toolkit REST API, establishing session-based access without relying on hardcoded credentials.
+Real-Time Command Stream: A high-performance processing engine managing live device states, standard telemetry buffering, and critical hardware failures.
+Predictive Action Engine: An automated insight module that cross-references out-of-range sensor data with historical operator interactions to surface proactive command recommendations.
+2. Core Data Structures & Algorithmic Complexity
+To ensure strict O(1) and O(n) performance across the real-time stream, the backend architecture enforces the following dedicated C# collections:
+Instance Name
+Data Structure
+Complexity
+System Implementation
+TelemetryQueue
+Queue<string>
+O(1)
+First-In-First-Out (FIFO) processing of standard incoming edge-node telemetry.
+CriticalAlertQueue
+PriorityQueue<string, int>
+O(n)
+Min-heap priority queue ensuring critical alerts (e.g., voltage spikes) bypass standard telemetry.
+CommandUndoStack
+Stack<OverrideCommand>
+O(1)
+First-In-Last-Out (FILO) manual override history allowing safe, one-click state restoration.
+DeviceRegistry
+Dictionary<string, DeviceState>
+O(1)
+Hash table keyed on MAC addresses for instantaneous telemetry updates and state mutations.
+SensorTimeline
+SortedDictionary<DateTime, string>
+O(n)
+Self-balancing binary search tree keyed on UTC timestamps to strictly order timeline event logs.
+DisconnectedNodes
+HashSet<string>
+O(1)
+Maintains a unique set of faulty MAC addresses to automatically suppress duplicate alert processing.
+
+
+3. Deployment & Setup
+Firebase Configuration
+Open appsettings.json in the root directory.
+Insert your Firebase Web API Key:
+"Firebase": {
   "WebApiKey": "YOUR_FIREBASE_WEB_API_KEY_HERE"
 }
-Ensure Email/Password authentication is enabled in your Firebase Console.Application LaunchOption A: IDE (Rider / Visual Studio)Open Smart-X-Ecosystem.slnx or Smart-X-Ecosystem.csproj.Select the http launch profile and run the application. The system will launch at http://localhost:5000.Option B: Docker Containerizationdocker build -t smart-x-ecosystem .
+Ensure Email/Password authentication is enabled in your Firebase Console.
+Local Execution (IDE)
+Open Smart-X-Ecosystem.slnx or Smart-X-Ecosystem.csproj in JetBrains Rider or Visual Studio 2022.
+Select the http launch profile.
+Run the application (F5 or Shift+F10). The dashboard will launch at http://localhost:5000.
+Containerized Execution (Docker)
+docker build -t smart-x-ecosystem .
 docker run -p 8080:8080 smart-x-ecosystem
-Navigate to http://localhost:8080.4. System Workflows and Testing GuideA. Secure Gateway AuthenticationLaunch the application to view the enterprise landing page.Enter an email and password in the Operator Portal, then click Create New Operator Account (or Sign In).Upon successful Firebase REST API authentication, the secure dashboard routing will unlock.B. High-Priority Alert Bypassing (Queues vs Priority Queues)Navigate to the Command Stream module.Click + Normal Packet twice to load standard packets into the TelemetryQueue.Click ⚠️ Moisture Sensor B < 20% to simulate a high-priority environmental failure into the CriticalAlertQueue.Click ▶ Dequeue & Process Next Packet.Result: Watch the system logs. The Priority 1 alert explicitly bypasses the standard FIFO queue and is processed immediately.C. Duplicate Alert Suppression (HashSet)On the Command Stream dashboard, click 🔌 Simulate Disconnect. The MAC address appears in the red unique active errors panel (DisconnectedNodes).Click the simulate button a second time.Result: The HashSet.Add() method algorithmically rejects the duplicate in $O(1)$ time, suppressing the warning and preventing alert fatigue.D. Safe State Restoration (Stack LIFO)In the live device table, click Toggle Relay on any online device. The action is executed and pushed onto the CommandUndoStack.Click ↩ Undo Last Command in the top right panel.Result: The previous hardware state is popped from the FILO stack and instantly restored.E. Predictive Action Engine (Algorithmic Co-occurrence)Query Pump A in the dictionary search bar and click Record Search.Trigger the ⚠️ Moisture Sensor B < 20% anomaly using the simulator buttons.Result: The Predictive Action Engine analyzes the out-of-range telemetry against recorded operator workflows and proactively generates an Automated Insight card, suggesting you activate Water Pump A before you manually search for it again.
+
+Navigate to http://localhost:8080 in your browser.
+4. Functional Testing Guide
+Follow these steps to verify the underlying algorithms and stream-processing mechanics:
+A. Secure Authentication
+Launch the application to view the enterprise landing page.
+Enter an email and password in the Operator Portal, then click Create New Operator Account (or Sign In).
+Upon successful REST API authentication, the secure dashboard routing will unlock Modules 1 and 2.
+B. Queue Prioritization (PriorityQueue Bypass)
+Navigate to the Command Stream module.
+Click + Normal Packet twice to load standard telemetry into the FIFO TelemetryQueue.
+Click ⚠️ Moisture Sensor B < 20% to simulate a high-priority environmental failure.
+Click ▶ Dequeue & Process Next Packet.
+Expected Result: The Priority 1 alert explicitly bypasses the standard FIFO queue and processes immediately.
+C. Duplicate Alert Suppression (HashSet)
+Click 🔌 Simulate Disconnect. The target MAC address appears in the active errors panel (DisconnectedNodes).
+Click the simulate button a second time to fire the exact same error.
+Expected Result: The HashSet.Add() method rejects the duplicate in O(1) time, suppressing the warning and preventing operator UI fatigue.
+D. Safe State Restoration (Stack)
+In the live device table, click Toggle Relay on any online device. The action is executed and pushed onto the CommandUndoStack.
+Click ↩ Undo Last Command in the top right panel.
+Expected Result: The previous hardware state is popped from the FILO stack and instantly restored on the grid.
+E. Predictive Action Engine (Behavioral Co-occurrence)
+Search for Pump A in the dictionary search bar and click Record Search.
+Trigger the ⚠️ Moisture Sensor B < 20% anomaly using the simulator buttons.
+Expected Result: The engine mathematically analyzes the out-of-range telemetry against recorded operator workflows and proactively generates an Automated Insight card, suggesting you activate Water Pump A.
+5. References
+Jamro, M., 2018. C# data structures and algorithms. Birmingham: Packt Publishing.
+Nakov, S., Kolev, V. et al., 2013. Fundamentals of computer programming with C#. Sofia: Telerik Software Academy.
