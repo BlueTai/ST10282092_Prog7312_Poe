@@ -15,7 +15,12 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40aa5b2c-bed6-43a0-9382-494d1bb60f18" name="Changes" comment="" />
+    <list default="true" id="40aa5b2c-bed6-43a0-9382-494d1bb60f18" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Models/CommandModels.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/CommandStreamService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/FirebaseAuthService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/IngestionEngine.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/IngestionEngine.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,6 +45,11 @@
     &quot;accountId&quot;: &quot;7b1600eb-26ae-4101-a62f-db9b558fa0ee&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Models/CommandModels.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Services/CommandStreamService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Services/FirebaseAuthService.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -49,6 +59,9 @@
   &quot;fromUser&quot;: false
 }</component>
   <component name="ProjectId" id="3KsmKeABeYEgE5Txq20BtAZcF8J" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />

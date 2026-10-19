@@ -1,27 +1,39 @@
-﻿using System.Collections.Generic;
-
-namespace Smart_X_Ecosystem.Services
+﻿namespace Smart_X_Ecosystem.Services
 {
     public class IngestionEngine
     {
-        // Jagged array to manage bursts of high-frequency data
-        private double[][] _rawTelemetryBuffer = new double[10][];
-        public List<double> OptimizedTelemetryCollection { get; private set; } = new List<double>();
+        private readonly double[][] _telemetryBatches;
+        private int _currentBatchIndex;
 
-        public void BufferIncomingBurst(int zoneIndex, double[] burstData)
+        public IngestionEngine()
         {
-            _rawTelemetryBuffer[zoneIndex] = burstData;
+            _telemetryBatches = new double[10][];
+            _currentBatchIndex = 0;
         }
 
-        public void ProcessBufferToCollection()
+        public void RecordBurst(double[] readings)
         {
-            foreach (var batch in _rawTelemetryBuffer)
+            if (_currentBatchIndex < _telemetryBatches.Length)
             {
-                if (batch != null)
+                _telemetryBatches[_currentBatchIndex] = readings;
+                _currentBatchIndex++;
+            }
+        }
+
+        public List<double> FlattenAllBatches()
+        {
+            var flatList = new List<double>();
+            for (int i = 0; i < _currentBatchIndex; i++)
+            {
+                if (_telemetryBatches[i] != null)
                 {
-                    OptimizedTelemetryCollection.AddRange(batch);
+                    for (int j = 0; j < _telemetryBatches[i].Length; j++)
+                    {
+                        flatList.Add(_telemetryBatches[i][j]);
+                    }
                 }
             }
+            return flatList;
         }
     }
 }
