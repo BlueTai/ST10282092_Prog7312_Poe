@@ -1,4 +1,4 @@
-﻿@using Smart_X_Ecosystem.Services
+@using Smart_X_Ecosystem.Services
 @inject FirebaseAuthService AuthService
 @implements IDisposable
 
@@ -42,11 +42,10 @@
 
             <div class="sidebar-heading mt-4">Final PoE</div>
             <div class="nav-item">
-                <span class="nav-link" style="cursor: not-allowed; opacity: 0.4;" title="Locked for Final PoE">
+                <NavLink class="nav-link" href="topology">
                     <i class="bi bi-diagram-3"></i>
                     <span>Network Topology</span>
-                    <i class="bi bi-lock-fill ms-auto small"></i>
-                </span>
+                </NavLink>
             </div>
         }
         else
