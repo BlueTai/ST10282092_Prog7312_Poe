@@ -1,4 +1,9 @@
+using System;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Smart_X_Ecosystem.Services
 {
@@ -30,13 +35,26 @@ namespace Smart_X_Ecosystem.Services
 
         private async Task<(bool Success, string Message)> SendFirebaseAuthRequestAsync(string action, string email, string password)
         {
+            string cleanEmail = (email ?? string.Empty).Trim();
+            string cleanPassword = (password ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(cleanEmail) || !cleanEmail.Contains('@'))
+            {
+                return (false, "Please enter a valid operator email address (e.g., operator@smartx.io).");
+            }
+
+            if (string.IsNullOrWhiteSpace(cleanPassword) || cleanPassword.Length < 6)
+            {
+                return (false, "Firebase requires passwords to be at least 6 characters long.");
+            }
+
             if (string.IsNullOrWhiteSpace(_apiKey))
             {
                 return (false, "Firebase WebApiKey is missing in appsettings.json.");
             }
 
             string url = $"https://identitytoolkit.googleapis.com/v1/accounts:{action}?key={_apiKey}";
-            var payload = new { email, password, returnSecureToken = true };
+            var payload = new { email = cleanEmail, password = cleanPassword, returnSecureToken = true };
 
             try
             {
@@ -47,7 +65,7 @@ namespace Smart_X_Ecosystem.Services
                 {
                     using var doc = JsonDocument.Parse(json);
                     IdToken = doc.RootElement.GetProperty("idToken").GetString() ?? string.Empty;
-                    CurrentUserEmail = doc.RootElement.GetProperty("email").GetString() ?? email;
+                    CurrentUserEmail = doc.RootElement.GetProperty("email").GetString() ?? cleanEmail;
                     IsAuthenticated = true;
                     OnAuthStateChanged?.Invoke();
                     return (true, "Authenticated successfully via Firebase Identity Toolkit API.");
@@ -56,6 +74,13 @@ namespace Smart_X_Ecosystem.Services
                 {
                     using var doc = JsonDocument.Parse(json);
                     string errorMsg = doc.RootElement.GetProperty("error").GetProperty("message").GetString() ?? "Authentication failed.";
+
+                    // If user clicks "Create New Operator Account" for an email that already exists, automatically try signing them in
+                    if (action == "signUp" && errorMsg.Contains("EMAIL_EXISTS", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return await SendFirebaseAuthRequestAsync("signInWithPassword", cleanEmail, cleanPassword);
+                    }
+
                     return (false, $"Firebase API Error: {errorMsg}");
                 }
             }

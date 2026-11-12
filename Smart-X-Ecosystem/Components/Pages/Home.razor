@@ -45,20 +45,23 @@
 
                         <div class="mb-3">
                             <label class="form-label text-secondary fw-semibold small">Operator Email</label>
-                            <input type="email" class="form-control" placeholder="operator@smartx.io" @bind="Email" />
+                            <input type="email" class="form-control" placeholder="operator@smartx.io" @bind="Email" @bind:event="oninput" />
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label text-secondary fw-semibold small">Password</label>
-                            <input type="password" class="form-control" placeholder="••••••••" @bind="Password" />
+                            <label class="form-label text-secondary fw-semibold small">Password (min 6 chars)</label>
+                            <input type="password" class="form-control" placeholder="••••••••" @bind="Password" @bind:event="oninput" />
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary py-2 fw-semibold" @onclick="HandleSignIn" disabled="@IsBusy">
+                            <button type="button" class="btn btn-primary py-2 fw-semibold" @onclick="HandleSignIn" disabled="@IsBusy">
                                 @(IsBusy ? "Authenticating..." : "Sign In to Dashboard")
                             </button>
-                            <button class="btn btn-outline-secondary py-2 small" @onclick="HandleSignUp" disabled="@IsBusy">
+                            <button type="button" class="btn btn-outline-secondary py-2 small" @onclick="HandleSignUp" disabled="@IsBusy">
                                 Create New Operator Account
+                            </button>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none mt-1" @onclick="SignInWithDemoAccount" disabled="@IsBusy">
+                                ⚡ Instant Demo Operator Login (testoperator@smartx.io)
                             </button>
                         </div>
                     </div>
@@ -130,5 +133,12 @@
         AuthSuccess = result.Success;
         AuthMessage = result.Message;
         IsBusy = false;
+    }
+
+    private async Task SignInWithDemoAccount()
+    {
+        Email = "testoperator@smartx.io";
+        Password = "Password123!";
+        await HandleSignIn();
     }
 }
