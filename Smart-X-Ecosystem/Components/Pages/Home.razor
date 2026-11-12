@@ -1,115 +1,63 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 @using Smart_X_Ecosystem.Services
 @inject NavigationManager NavManager
 @inject FirebaseAuthService AuthService
 @inject CommandStreamService StreamService
-
 <PageTitle>Smart-X Enterprise IoT Platform</PageTitle>
 
-<div class="container-fluid py-4">
-    <!-- HERO HEADER -->
-    <div class="p-4 p-md-5 mb-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0b192c 0%, #1e3e62 60%, #000000 100%);">
-        <div class="row align-items-center">
-            <div class="col-lg-7">
-                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-info bg-opacity-10 border border-info border-opacity-25 mb-3">
-                    <span class="spinner-grow spinner-grow-sm text-info" role="status"></span>
-                    <small class="fw-semibold text-info tracking-wide">SMART-X INDUSTRIAL TELEMETRY & CONTROL ENGINE v2.4</small>
-                </div>
-                <h1 class="display-5 fw-bold mb-3 tracking-tight">Next-Gen Edge Microcontroller & Smart Grid Orchestration</h1>
-                <p class="lead text-light opacity-75 mb-4">
-                    Unified real-time ingestion, AES-256 encrypted batch provisioning, $O(1)$ device state indexing, and automated anomaly response across distributed ESP32 sensor arrays.
-                </p>
-                <div class="d-flex flex-wrap gap-3 text-center">
-                    <div class="px-3 py-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10">
-                        <div class="h4 fw-bold text-info mb-0">@StreamService.DeviceRegistry.Count</div>
-                        <small class="text-white-50 fs-7">Registered Nodes</small>
-                    </div>
-                    <div class="px-3 py-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10">
-                        <div class="h4 fw-bold text-warning mb-0">@StreamService.CriticalAlertQueue.Count</div>
-                        <small class="text-white-50 fs-7">Priority Alerts</small>
-                    </div>
-                    <div class="px-3 py-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10">
-                        <div class="h4 fw-bold text-success mb-0">99.98%</div>
-                        <small class="text-white-50 fs-7">Mesh Uptime</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PRODUCT TOPOLOGY SVG -->
-            <div class="col-lg-5 d-none d-lg-flex justify-content-center">
-                <svg width="340" height="220" viewBox="0 0 340 220" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="10" y="10" width="320" height="200" rx="16" fill="#0f2537" stroke="#00d2ff" stroke-width="2"/>
-                    <circle cx="70" cy="65" r="22" fill="#198754" stroke="#fff" stroke-width="2"/>
-                    <text x="70" y="70" fill="#fff" font-size="10" font-family="Inter" text-anchor="middle">ESP32-A</text>
-                    <circle cx="70" cy="155" r="22" fill="#dc3545" stroke="#fff" stroke-width="2"/>
-                    <text x="70" y="160" fill="#fff" font-size="10" font-family="Inter" text-anchor="middle">ESP32-B</text>
-                    <rect x="140" y="75" width="75" height="70" rx="10" fill="#0d6efd" stroke="#fff" stroke-width="2"/>
-                    <text x="177" y="108" fill="#fff" font-size="11" font-weight="bold" font-family="Inter" text-anchor="middle">SMART-X</text>
-                    <text x="177" y="124" fill="#fff" font-size="9" font-family="Inter" text-anchor="middle">API GATEWAY</text>
-                    <circle cx="275" cy="110" r="26" fill="#ffc107" stroke="#fff" stroke-width="2"/>
-                    <text x="275" y="114" fill="#000" font-size="10" font-weight="bold" font-family="Inter" text-anchor="middle">CLOUD</text>
-                    <line x1="92" y1="65" x2="140" y2="95" stroke="#00d2ff" stroke-width="2" stroke-dasharray="4"/>
-                    <line x1="92" y1="155" x2="140" y2="125" stroke="#ff4d4d" stroke-width="2" stroke-dasharray="4"/>
-                    <line x1="215" y1="110" x2="249" y2="110" stroke="#00ff88" stroke-width="3"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <!-- PROFESSIONAL LOGIN / AUTHENTICATION PORTAL -->
+<div class="container-fluid py-2">
     @if (!AuthService.IsAuthenticated)
     {
-        <div class="row justify-content-center my-5">
+        <!-- HERO HEADER -->
+        <div class="p-4 p-md-5 mb-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0b192c 0%, #1e3e62 60%, #000000 100%);">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-info bg-opacity-10 border border-info border-opacity-25 mb-3">
+                        <span class="spinner-grow spinner-grow-sm text-info" role="status"></span>
+                        <small class="fw-semibold text-info">SMART-X INDUSTRIAL TELEMETRY & MESH ROUTING ENGINE v3.0</small>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">Next-Gen Edge Microcontroller & Self-Healing Mesh Orchestration</h1>
+                    <p class="lead text-light opacity-75 mb-4">
+                        Unified real-time ingestion, AES-256 encrypted batch provisioning, O(1) device state indexing, Prim's Minimum Spanning Tree routing, and AVL Tree historical analytics.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGIN PORTAL -->
+        <div class="row justify-content-center my-4">
             <div class="col-md-7 col-lg-5 col-xl-4">
                 <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
                     <div class="card-header bg-gradient bg-primary text-white p-4 text-center">
-                        <div class="mb-2">
-                            <span class="badge bg-white text-primary px-3 py-1 rounded-pill fw-semibold shadow-sm">SECURE GATEWAY</span>
-                        </div>
+                        <span class="badge bg-white text-primary px-3 py-1 rounded-pill fw-semibold shadow-sm mb-2">SECURE GATEWAY</span>
                         <h4 class="fw-bold mb-1">Operator Portal</h4>
-                        <p class="text-white-50 small mb-0">Sign in to access your IoT telemetry modules</p>
+                        <p class="text-white-50 small mb-0">Sign in via Firebase to unlock all 3 IoT modules</p>
                     </div>
 
-                    <div class="card-body p-4 p-md-5 bg-white">
+                    <div class="card-body p-4 bg-white">
                         @if (!string.IsNullOrEmpty(AuthMessage))
                         {
-                            <div class="alert @(AuthSuccess ? "alert-success" : "alert-danger") border-0 shadow-sm small py-3 mb-4 rounded-3 d-flex align-items-center gap-2" role="alert">
-                                <div>@AuthMessage</div>
+                            <div class="alert @(AuthSuccess ? "alert-success" : "alert-danger") small py-2 mb-3">
+                                @AuthMessage
                             </div>
                         }
 
                         <div class="mb-3">
-                            <label class="form-label text-secondary fw-semibold fs-7 uppercase tracking-wider">Operator Email</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted px-3">✉️</span>
-                                <input type="email" class="form-control bg-light border-start-0 py-2 fs-6 shadow-none" placeholder="operator@smartx.io" @bind="Email" />
-                            </div>
+                            <label class="form-label text-secondary fw-semibold small">Operator Email</label>
+                            <input type="email" class="form-control" placeholder="operator@smartx.io" @bind="Email" />
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label text-secondary fw-semibold fs-7 uppercase tracking-wider">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 text-muted px-3">🔒</span>
-                                <input type="password" class="form-control bg-light border-start-0 py-2 fs-6 shadow-none" placeholder="••••••••" @bind="Password" />
-                            </div>
-                            <div class="form-text text-muted fs-8 mt-1">Minimum 6 characters required by Firebase.</div>
+                            <label class="form-label text-secondary fw-semibold small">Password</label>
+                            <input type="password" class="form-control" placeholder="••••••••" @bind="Password" />
                         </div>
 
-                        <div class="d-grid gap-2.5">
-                            <button class="btn btn-primary py-2.5 fw-semibold shadow-sm rounded-3 d-flex align-items-center justify-content-center gap-2" @onclick="HandleSignIn" disabled="@IsBusy">
-                                @if (IsBusy)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span>Authenticating...</span>
-                                }
-                                else
-                                {
-                                    <span>Sign In to Dashboard</span>
-                                }
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary py-2 fw-semibold" @onclick="HandleSignIn" disabled="@IsBusy">
+                                @(IsBusy ? "Authenticating..." : "Sign In to Dashboard")
                             </button>
-
-                            <button class="btn btn-outline-secondary py-2 fw-medium border-0 text-muted fs-7 rounded-3 mt-1" @onclick="HandleSignUp" disabled="@IsBusy">
+                            <button class="btn btn-outline-secondary py-2 small" @onclick="HandleSignUp" disabled="@IsBusy">
                                 Create New Operator Account
                             </button>
                         </div>
@@ -120,70 +68,46 @@
     }
     else
     {
-        <div class="alert alert-success d-flex justify-content-between align-items-center shadow-sm mb-4 py-3 px-4 rounded-4 border-0 bg-success bg-opacity-10">
-            <div class="d-flex align-items-center gap-2">
-                <span class="fs-5">🟢</span>
-                <div>
-                    <strong>Authenticated Session:</strong> Logged in as <code class="text-dark fw-semibold">@AuthService.CurrentUserEmail</code> via Firebase REST API.
+        <!-- STATEFUL SINGLE-PAGE PILLAR WORKSPACE BAR (ZERO STATE LOSS ON SWITCH) -->
+        <div class="card shadow-sm border-0 mb-4 bg-dark text-white">
+            <div class="card-body py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn @(ActivePillar == 1 ? "btn-primary fw-bold" : "btn-outline-light")" @onclick="() => ActivePillar = 1">
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Pillar 1: Sensor Data Ingestion
+                    </button>
+                    <button class="btn @(ActivePillar == 2 ? "btn-success fw-bold" : "btn-outline-light")" @onclick="() => ActivePillar = 2">
+                        <i class="bi bi-activity me-1"></i> Pillar 2: Real-Time Command Stream
+                    </button>
+                    <button class="btn @(ActivePillar == 3 ? "btn-info text-dark fw-bold" : "btn-outline-light")" @onclick="() => ActivePillar = 3">
+                        <i class="bi bi-diagram-3 me-1"></i> Pillar 3: Network Topology & Mesh Routing
+                    </button>
                 </div>
-            </div>
-            <button class="btn btn-sm btn-outline-danger fw-semibold px-3 py-1.5 rounded-pill" @onclick="AuthService.SignOut">Sign Out</button>
-        </div>
 
-        <!-- 3 ARCHITECTURAL MODULES -->
-        <div class="row justify-content-center g-4">
-            <!-- Module 1: Sensor Data Ingestion -->
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100 border-0 rounded-4">
-                    <div class="card-body d-flex flex-column p-4">
-                        <span class="badge bg-primary bg-opacity-15 text-primary align-self-start mb-3 px-3 py-1.5 rounded-pill fw-semibold">Module 1 — Active (Part 1)</span>
-                        <h5 class="card-title fw-bold text-dark">Sensor Data Ingestion and Telemetry</h5>
-                        <p class="card-text text-secondary text-opacity-75 mb-4 fs-7">
-                            Validate incoming ESP32 telemetry packets, process `.txt` batch device uploads into the live grid, and apply AES-256 log encryption.
-                        </p>
-                        <button class="btn btn-primary mt-auto fw-semibold py-2.5 rounded-3" @onclick='() => NavManager.NavigateTo("/ingestion")'>
-                            Open Ingestion Gateway
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 2: Real-Time Command Stream -->
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100 border-0 rounded-4">
-                    <div class="card-body d-flex flex-column p-4">
-                        <span class="badge bg-success bg-opacity-15 text-success align-self-start mb-3 px-3 py-1.5 rounded-pill fw-semibold">Module 2 — Active (Part 2)</span>
-                        <h5 class="card-title fw-bold text-dark">Real-Time Command Stream & History</h5>
-                        <p class="card-text text-secondary text-opacity-75 mb-4 fs-7">
-                            Live telemetry gauges, FIFO & Priority queues, $O(1)$ dictionary lookups, FILO command undo stack, and Predictive Action Engine.
-                        </p>
-                        <button class="btn btn-success mt-auto fw-semibold py-2.5 rounded-3" @onclick='() => NavManager.NavigateTo("/command-stream")'>
-                            Launch Command Stream
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Module 3: Network Topology (PoE) -->
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100 bg-light border-0 rounded-4 text-muted" style="opacity: 0.75;">
-                    <div class="card-body d-flex flex-column p-4">
-                        <span class="badge bg-secondary bg-opacity-15 text-secondary align-self-start mb-3 px-3 py-1.5 rounded-pill fw-semibold">Module 3 — Final PoE</span>
-                        <h5 class="card-title fw-bold">Network Topology and Mesh Routing</h5>
-                        <p class="card-text mb-4 fs-7">
-                            Graph-based mesh routing, shortest-path failover calculation, and spatial node topology mapping.
-                        </p>
-                        <button class="btn btn-secondary mt-auto py-2.5 rounded-3" disabled>
-                            Locked for Final PoE
-                        </button>
-                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-white-50">Authenticated: <code class="text-info">@AuthService.CurrentUserEmail</code></small>
+                    <button class="btn btn-sm btn-outline-danger" @onclick="AuthService.SignOut">Sign Out</button>
                 </div>
             </div>
         </div>
+
+        <!-- RENDER ACTIVE PILLAR INLINE WITHOUT ROUTE RELOAD -->
+        @if (ActivePillar == 1)
+        {
+            <Ingestion />
+        }
+        else if (ActivePillar == 2)
+        {
+            <CommandStream />
+        }
+        else if (ActivePillar == 3)
+        {
+            <NetworkTopology />
+        }
     }
 </div>
 
 @code {
+    private int ActivePillar { get; set; } = 3; // Default to Module 3 (Final PoE) or switch seamlessly
     private string Email { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private string AuthMessage { get; set; } = string.Empty;

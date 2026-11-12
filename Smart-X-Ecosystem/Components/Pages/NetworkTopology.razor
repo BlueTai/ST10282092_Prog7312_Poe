@@ -1,0 +1,304 @@
+@page "/topology"
+@rendermode InteractiveServer
+@using Smart_X_Ecosystem.Models
+@using Smart_X_Ecosystem.Services
+@using System.Globalization
+@inject MeshTopologyService TopologyService
+@inject CommandStreamService StreamService
+@inject FirebaseAuthService AuthService
+@inject NavigationManager NavManager
+@implements IDisposable
+
+<PageTitle>Network Topology & Self-Healing Mesh</PageTitle>
+
+@if (!AuthService.IsAuthenticated)
+{
+    <div class="container mt-5">
+        <div class="alert alert-warning shadow-sm">
+            <h5>🔒 Authentication Required</h5>
+            <p class="mb-2">Please authenticate via Firebase on the Home page to access Network Topology &amp; Mesh Routing.</p>
+            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Go to Login</button>
+        </div>
+    </div>
+}
+else
+{
+    var mstEdges = TopologyService.ComputeMinimumSpanningTree();
+    double mstTotalCost = Math.Round(mstEdges.Sum(e => e.CostWeight), 1);
+
+    <div class="container-fluid py-2">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="fw-bold text-primary mb-0">Network Topology &amp; Self-Healing Mesh Routing (Module 3)</h2>
+                <p class="text-muted mb-0">Weighted Adjacency List, BFS/DFS Subnet Traversals, Prim's MST via BinaryMinHeap &amp; HistoricalAvlTree Range Queries</p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-info text-dark">AVL Nodes: @TopologyService.AvlRecordCount (Height: @TopologyService.HistoricalAvlTree.TreeHeight | Rotations: @TopologyService.AvlRotationsPerformed)</span>
+                <span class="badge bg-success">Prim's MST Links: @mstEdges.Count (@mstTotalCost ms)</span>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- INTERACTIVE MESH GRAPH CANVAS -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Interactive Self-Healing Mesh Graph (Green = Prim's MST | Amber = Active Multi-Hop Route)</span>
+                        <small class="text-white-50">Click node buttons below to toggle Online/Offline &amp; watch MST heal</small>
+                    </div>
+                    <div class="card-body">
+                        <svg width="100%" height="330" viewBox="0 0 800 330" style="background: #0f172a; border-radius: 0.5rem;">
+                            @foreach (var edge in TopologyService.Edges)
+                            {
+                                if (TopologyService.Nodes.TryGetValue(edge.SourceMac, out var s) &&
+                                    TopologyService.Nodes.TryGetValue(edge.TargetMac, out var t))
+                                {
+                                    bool isMst = mstEdges.Contains(edge);
+                                    bool isRoute = HighlightedPath.Count > 1 && IsEdgeInPath(edge.SourceMac, edge.TargetMac);
+                                    string stroke = isRoute ? "#f59e0b" : isMst ? "#22c55e" : "#334155";
+                                    int width = isRoute ? 4 : isMst ? 3 : 1;
+
+                                    <line x1="@s.X.ToString("0", CultureInfo.InvariantCulture)"
+                                          y1="@s.Y.ToString("0", CultureInfo.InvariantCulture)"
+                                          x2="@t.X.ToString("0", CultureInfo.InvariantCulture)"
+                                          y2="@t.Y.ToString("0", CultureInfo.InvariantCulture)"
+                                          stroke="@stroke"
+                                          stroke-width="@width" />
+                                }
+                            }
+
+                            @foreach (var node in TopologyService.Nodes.Values)
+                            {
+                                string fill = !node.IsOnline ? "#ef4444" :
+                                              node.Role == "Root Gateway" ? "#38bdf8" :
+                                              node.Role == "Area Router" ? "#a855f7" : "#22c55e";
+
+                                <circle cx="@node.X.ToString("0", CultureInfo.InvariantCulture)"
+                                        cy="@node.Y.ToString("0", CultureInfo.InvariantCulture)"
+                                        r="16"
+                                        fill="@fill"
+                                        stroke="#ffffff"
+                                        stroke-width="2" />
+
+                                @(new MarkupString($"<text x=\"{node.X.ToString("0", CultureInfo.InvariantCulture)}\" y=\"{(node.Y + 30).ToString("0", CultureInfo.InvariantCulture)}\" fill=\"#f8fafc\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">{node.DeviceName}</text>"))
+                            }
+                        </svg>
+
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            @foreach (var node in TopologyService.Nodes.Values)
+                            {
+                                <button class="btn btn-sm @(node.IsOnline ? "btn-outline-success" : "btn-danger")"
+                                        @onclick="() => ToggleNodeState(node)">
+                                    @(node.IsOnline ? "🟢" : "🔴") @node.DeviceName (@node.MacAddress[^5..])
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIJKSTRA FAILOVER ROUTING & BFS/DFS SUBNET TRAVERSALS -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        Self-Healing Multi-Hop Failover Routing
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold">Source Node</label>
+                            <select class="form-select form-select-sm" @bind="SourceMac">
+                                @foreach (var n in TopologyService.Nodes.Values)
+                                {
+                                    <option value="@n.MacAddress">@n.DeviceName (@n.MacAddress)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Destination Node</label>
+                            <select class="form-select form-select-sm" @bind="TargetMac">
+                                @foreach (var n in TopologyService.Nodes.Values)
+                                {
+                                    <option value="@n.MacAddress">@n.DeviceName (@n.MacAddress)</option>
+                                }
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-sm w-100 fw-bold" @onclick="CalculateShortestRoute">
+                            Compute Optimal Failover Route
+                        </button>
+
+                        @if (HighlightedPath.Count > 0)
+                        {
+                            <div class="alert alert-success small mt-3 mb-0 py-2">
+                                <strong>Optimal Path (@RouteCost ms):</strong><br />
+                                @string.Join(" → ", HighlightedPath.Select(m => TopologyService.Nodes.TryGetValue(m, out var nd) ? nd.DeviceName : m))
+                            </div>
+                        }
+                        else if (RouteSearched)
+                        {
+                            <div class="alert alert-danger small mt-3 mb-0 py-2">
+                                No active route available (target or intermediate gateway offline).
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- BFS & DFS SUBNET TRAVERSAL DIAGNOSTICS -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+                        <span>BFS / DFS Subnet Traversal</span>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-info btn-sm" @onclick="RunBfsTraversal">Run BFS</button>
+                            <button class="btn btn-outline-warning btn-sm" @onclick="RunDfsTraversal">Run DFS</button>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="small text-muted mb-1">Mode: <strong>@TraversalMode</strong> (@TraversalOrder.Count reachable online nodes)</div>
+                        <div class="small bg-light p-2 rounded border" style="max-height: 110px; overflow-y: auto;">
+                            @string.Join(" ➔ ", TraversalOrder.Select(n => n.DeviceName))
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORICAL AVL TREE O(log n + k) TIME-WINDOW RANGE QUERY -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span class="fw-bold">
+                    🌲 Self-Balancing <code>HistoricalAvlTree</code> — O(log n + k) Time-Window Range Query
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="small mb-0">Lookback Window:</label>
+                    <select class="form-select form-select-sm" style="width: auto;" @bind="LookbackMinutes">
+                        <option value="1">Last 1 Minute</option>
+                        <option value="5">Last 5 Minutes</option>
+                        <option value="15">Last 15 Minutes</option>
+                        <option value="60">Last 60 Minutes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                @{
+                    var windowRecords = TopologyService.QueryAvlTimeWindow(DateTime.UtcNow.AddMinutes(-LookbackMinutes), DateTime.UtcNow);
+                }
+                @if (windowRecords.Count == 0)
+                {
+                    <p class="text-muted small p-3 mb-0">No AVL telemetry records within the selected time window yet.</p>
+                }
+                else
+                {
+                    <div style="max-height: 210px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Timestamp (UTC)</th>
+                                    <th>Seq #</th>
+                                    <th>MAC Address</th>
+                                    <th>Device Name</th>
+                                    <th>Category</th>
+                                    <th>Reading</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rec in windowRecords.AsEnumerable().Reverse())
+                                {
+                                    <tr>
+                                        <td class="font-monospace">@rec.Timestamp.ToLocalTime().ToString("HH:mm:ss.fff")</td>
+                                        <td><code>#@rec.Sequence</code></td>
+                                        <td><code>@rec.MacAddress</code></td>
+                                        <td class="fw-bold">@rec.DeviceName</td>
+                                        <td><span class="badge bg-info text-dark">@rec.Category</span></td>
+                                        <td><span class="badge bg-dark">@rec.Reading @rec.Unit</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string SourceMac { get; set; } = "00:1B:44:00:00:01";
+    private string TargetMac { get; set; } = "00:1B:44:11:3A:B7";
+    private List<string> HighlightedPath { get; set; } = new();
+    private double RouteCost { get; set; }
+    private bool RouteSearched { get; set; }
+    private string TraversalMode { get; set; } = "BFS (Breadth-First Search)";
+    private List<MeshNode> TraversalOrder { get; set; } = new();
+    private int LookbackMinutes { get; set; } = 15;
+
+    protected override void OnInitialized()
+    {
+        TopologyService.OnTopologyChanged += HandleTopologyChanged;
+        CalculateShortestRoute();
+        RunBfsTraversal();
+    }
+
+    private void HandleTopologyChanged()
+    {
+        InvokeAsync(() =>
+        {
+            if (RouteSearched)
+            {
+                var res = TopologyService.FindShortestPath(SourceMac, TargetMac);
+                HighlightedPath = res.Path;
+                RouteCost = res.TotalCost;
+            }
+            if (TraversalMode.StartsWith("BFS"))
+                TraversalOrder = TopologyService.TraverseSubnetBfs(SourceMac);
+            else
+                TraversalOrder = TopologyService.TraverseSubnetDfs(SourceMac);
+
+            StateHasChanged();
+        });
+    }
+
+    private void ToggleNodeState(MeshNode node)
+    {
+        TopologyService.SetNodeOnlineState(node.MacAddress, !node.IsOnline);
+        CalculateShortestRoute();
+    }
+
+    private void CalculateShortestRoute()
+    {
+        RouteSearched = true;
+        var res = TopologyService.FindShortestPath(SourceMac, TargetMac);
+        HighlightedPath = res.Path;
+        RouteCost = res.TotalCost;
+    }
+
+    private void RunBfsTraversal()
+    {
+        TraversalMode = "BFS (Breadth-First Search)";
+        TraversalOrder = TopologyService.TraverseSubnetBfs(SourceMac);
+    }
+
+    private void RunDfsTraversal()
+    {
+        TraversalMode = "DFS (Depth-First Search)";
+        TraversalOrder = TopologyService.TraverseSubnetDfs(SourceMac);
+    }
+
+    private bool IsEdgeInPath(string a, string b)
+    {
+        for (int i = 0; i < HighlightedPath.Count - 1; i++)
+        {
+            if ((string.Equals(HighlightedPath[i], a, StringComparison.OrdinalIgnoreCase) &&
+                 string.Equals(HighlightedPath[i + 1], b, StringComparison.OrdinalIgnoreCase)) ||
+                (string.Equals(HighlightedPath[i], b, StringComparison.OrdinalIgnoreCase) &&
+                 string.Equals(HighlightedPath[i + 1], a, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void Dispose()
+    {
+        TopologyService.OnTopologyChanged -= HandleTopologyChanged;
+    }
+}
