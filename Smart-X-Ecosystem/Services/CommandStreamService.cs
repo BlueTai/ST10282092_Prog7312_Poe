@@ -3,35 +3,42 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using Smart_X_Ecosystem.Models;
 
 namespace Smart_X_Ecosystem.Services
 {
     public class CommandStreamService
     {
-        // 1. Standard FIFO Queue<T> for incoming telemetry packets (15 Marks)
-        public Queue<string> TelemetryQueue { get; } = new();
+        private readonly MeshTopologyService _topologyService;
+        private readonly object _syncLock = new();
+        private long _sequenceCounter = 0;
 
-        // 2. PriorityQueue for critical alerts bypassing normal queue (15 Marks)
-        public PriorityQueue<string, int> CriticalAlertQueue { get; } = new();
+        public event Action? OnStreamUpdated;
 
-        // 3. Stack<T> (FILO/LIFO) for manual override command undo history (15 Marks)
+        // 1. Typed FIFO Queue<QueuedTelemetryPacket> (carries Device, Value, Unit, Timestamp)
+        public Queue<QueuedTelemetryPacket> TelemetryQueue { get; } = new();
+
+        // 2. Typed PriorityQueue<QueuedTelemetryPacket, int> (emptied first by BackgroundService)
+        public PriorityQueue<QueuedTelemetryPacket, int> CriticalAlertQueue { get; } = new();
+
+        // 3. LIFO Stack<OverrideCommand> for manual override undo history
         public Stack<OverrideCommand> CommandUndoStack { get; } = new();
 
-        // 4. Dictionary<TKey, TValue> keyed on MAC for O(1) lookups (15 Marks)
+        // 4. Dictionary<string, DeviceState> keyed on MAC address for O(1) lookups
         public Dictionary<string, DeviceState> DeviceRegistry { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-        // 5. SortedDictionary keyed on timestamp for chronological ordered timeline (15 Marks)
-        public SortedDictionary<DateTime, string> SensorTimeline { get; } = new();
+        // 5. SortedDictionary<TimelineKey, TimelineEntry> keyed by (Timestamp + Sequence) storing full chartable readings
+        public SortedDictionary<TimelineKey, TimelineEntry> SensorTimeline { get; } = new();
 
-        // 6. HashSet<T> for unique active error states / disconnected nodes (10 Marks)
+        // 6. Unique Sets: DisconnectedNodes AND ActiveErrorStates
         public HashSet<string> DisconnectedNodes { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> ActiveErrorStates { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-        // LU4 Theme 1 & Theme 4 structures (Jamro Ch. 4)
         public Hashtable HardwareMetadataTable { get; } = new()
         {
             { "00:1B:44", "Espressif Systems (ESP32-WROOM-32D)" },
-            { "FIRMWARE", "v2.4.1-RTOS" }
+            { "FIRMWARE", "v3.0.0-RTOS" }
         };
 
         public SortedSet<string> ActiveCategoriesSet { get; } = new(StringComparer.OrdinalIgnoreCase)
@@ -39,14 +46,20 @@ namespace Smart_X_Ecosystem.Services
             "Hydroponics", "Power", "HVAC"
         };
 
-        // Predictive Engine Tracking Data Structures (30 Marks)
+        // Predictive Action Engine Observation Counters (for purely count-based confidence)
         public List<string> RecordedUserHistory { get; } = new();
         private readonly Dictionary<string, int> _queryFrequency = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Dictionary<string, int>> _actionCoOccurrence = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> _deviceTotalPackets = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> _deviceFaultPackets = new(StringComparer.OrdinalIgnoreCase);
         private string _lastTriggerEvent = string.Empty;
 
-        public CommandStreamService()
+        public string LastBackgroundProcessedSummary { get; private set; } = "Background worker standing by...";
+        public int TotalPacketsProcessedByWorker { get; private set; }
+
+        public CommandStreamService(MeshTopologyService topologyService)
         {
+            _topologyService = topologyService;
             SeedInitialDevices();
         }
 
@@ -61,27 +74,60 @@ namespace Smart_X_Ecosystem.Services
                 new DeviceState { MacAddress = "00:1B:44:11:3A:D9", DeviceName = "Greenhouse HVAC", Category = "HVAC", Status = "Online", LastReading = 24.0, MaxGaugeValue = 50.0, Unit = "°C", IsRelayActive = true }
             };
 
+            // Seed baseline observation counts so initial confidence ratios are derived strictly from counts
             foreach (var node in initialNodes)
             {
                 DeviceRegistry[node.MacAddress] = node;
-                AddTimelineLog($"[INIT] Registered {node.DeviceName} ({node.MacAddress}) in DeviceRegistry.");
+                _deviceTotalPackets[node.MacAddress] = 5;
+                _deviceFaultPackets[node.MacAddress] = node.Status == "Alert" ? 3 : 0;
+
+                AddTimelineReading(new TimelineEntry
+                {
+                    MacAddress = node.MacAddress,
+                    DeviceName = node.DeviceName,
+                    Category = node.Category,
+                    Value = node.LastReading,
+                    Unit = node.Unit,
+                    EventType = "INIT",
+                    Summary = $"Registered {node.DeviceName} at {node.LastReading}{node.Unit}",
+                    Timestamp = DateTime.UtcNow
+                });
             }
+
+            // Seed historical co-occurrence counts (e.g., 4 out of 5 historical moisture drops were followed by Pump A activation)
+            _actionCoOccurrence["Moisture Sensor B < 20%"] = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Pump A", 4 },
+                { "Greenhouse HVAC", 1 }
+            };
 
             DisconnectedNodes.Add("00:1B:44:11:3A:C2");
-            CriticalAlertQueue.Enqueue("[CRITICAL] Voltage Spike (415.8V) on Substation Meter X (00:1B:44:11:3A:C2)", 1);
-        }
+            ActiveErrorStates.Add("ERR_OVERVOLTAGE:00:1B:44:11:3A:C2");
 
-        public void AddTimelineLog(string eventDescription)
-        {
-            DateTime key = DateTime.UtcNow;
-            while (SensorTimeline.ContainsKey(key))
+            CriticalAlertQueue.Enqueue(new QueuedTelemetryPacket
             {
-                key = key.AddTicks(1);
-            }
-            SensorTimeline[key] = eventDescription;
+                MacAddress = "00:1B:44:11:3A:C2",
+                DeviceName = "Substation Meter X",
+                Category = "Power",
+                Value = 415.8,
+                Unit = "V",
+                Priority = 1,
+                IsCritical = true,
+                EventType = "CRITICAL_ALERT",
+                Timestamp = DateTime.UtcNow
+            }, 1);
         }
 
-        // Extracts devices line-by-line from uploaded .txt file into DeviceRegistry
+        public void AddTimelineReading(TimelineEntry entry)
+        {
+            lock (_syncLock)
+            {
+                long seq = Interlocked.Increment(ref _sequenceCounter);
+                var key = new TimelineKey(entry.Timestamp, seq);
+                SensorTimeline[key] = entry;
+            }
+        }
+
         public int ImportDevicesFromText(string fileContent)
         {
             if (string.IsNullOrWhiteSpace(fileContent)) return 0;
@@ -116,47 +162,89 @@ namespace Smart_X_Ecosystem.Services
                         LastUpdated = DateTime.UtcNow
                     };
 
-                    DeviceRegistry[mac] = device;
-                    ActiveCategoriesSet.Add(category);
-                    TelemetryQueue.Enqueue($"[FILE-IMPORT] Loaded {name} ({mac}) at {reading}{unit}");
-                    AddTimelineLog($"[FILE-IMPORT] Extracted & registered '{name}' ({mac}) from uploaded .txt batch file.");
+                    lock (_syncLock)
+                    {
+                        DeviceRegistry[mac] = device;
+                        ActiveCategoriesSet.Add(category);
+                        _deviceTotalPackets[mac] = _deviceTotalPackets.GetValueOrDefault(mac, 0) + 1;
+
+                        TelemetryQueue.Enqueue(new QueuedTelemetryPacket
+                        {
+                            MacAddress = mac,
+                            DeviceName = name,
+                            Category = category,
+                            Value = reading,
+                            Unit = unit,
+                            Priority = 2,
+                            IsCritical = false,
+                            EventType = "BATCH_IMPORT",
+                            Timestamp = DateTime.UtcNow
+                        });
+                    }
+
+                    _topologyService.RecordLiveTelemetryInAvlTree(device);
                     importedCount++;
                 }
             }
 
+            NotifyStateChanged();
             return importedCount;
         }
 
         public string IngestDeviceTelemetry(TelemetrySimulationRequest request)
         {
-            if (!DeviceRegistry.TryGetValue(request.MacAddress, out var device))
+            DeviceState device;
+            lock (_syncLock)
             {
-                device = new DeviceState
+                if (!DeviceRegistry.TryGetValue(request.MacAddress, out device!))
                 {
-                    MacAddress = request.MacAddress,
-                    DeviceName = $"ESP32-Node-{request.MacAddress[^2..]}",
-                    Category = "Power",
-                    MaxGaugeValue = 500.0,
-                    Unit = "V"
-                };
-                DeviceRegistry[request.MacAddress] = device;
+                    device = new DeviceState
+                    {
+                        MacAddress = request.MacAddress,
+                        DeviceName = $"ESP32-Node-{request.MacAddress[^2..]}",
+                        Category = "Power",
+                        MaxGaugeValue = 500.0,
+                        Unit = "V"
+                    };
+                    DeviceRegistry[request.MacAddress] = device;
+                }
+
+                _deviceTotalPackets[device.MacAddress] = _deviceTotalPackets.GetValueOrDefault(device.MacAddress, 0) + 1;
             }
 
-            device.LastReading = request.Reading;
-            device.LastUpdated = DateTime.UtcNow;
+            var packet = new QueuedTelemetryPacket
+            {
+                MacAddress = device.MacAddress,
+                DeviceName = device.DeviceName,
+                Category = device.Category,
+                Value = request.Reading,
+                Unit = device.Unit,
+                Timestamp = DateTime.UtcNow
+            };
 
             if (request.SimulateDisconnect)
             {
-                device.Status = "Offline";
-                bool isNewDisconnect = DisconnectedNodes.Add(device.MacAddress);
-                if (isNewDisconnect)
+                lock (_syncLock)
                 {
-                    string alertMsg = $"[DISCONNECT] {device.DeviceName} ({device.MacAddress}) dropped offline!";
-                    CriticalAlertQueue.Enqueue(alertMsg, 1);
-                    AddTimelineLog(alertMsg);
-                    return "Disconnect registered in DisconnectedNodes (HashSet) and routed to CriticalAlertQueue.";
+                    _deviceFaultPackets[device.MacAddress] = _deviceFaultPackets.GetValueOrDefault(device.MacAddress, 0) + 1;
+                    bool isNewDisconnect = DisconnectedNodes.Add(device.MacAddress);
+                    ActiveErrorStates.Add($"ERR_NODE_OFFLINE:{device.MacAddress}");
+
+                    if (!isNewDisconnect)
+                    {
+                        NotifyStateChanged();
+                        return "Duplicate disconnect suppressed by DisconnectedNodes (HashSet<string>) — no duplicate packet queued.";
+                    }
+
+                    packet.Priority = 1;
+                    packet.IsCritical = true;
+                    packet.EventType = "DISCONNECT_FAULT";
+                    CriticalAlertQueue.Enqueue(packet, 1);
                 }
-                return "Duplicate disconnect suppressed by DisconnectedNodes (HashSet<string>) — no duplicate alert created!";
+
+                _topologyService.SetNodeOnlineState(device.MacAddress, false);
+                NotifyStateChanged();
+                return "Typed disconnect packet enqueued in CriticalAlertQueue (Priority 1) & error added to ActiveErrorStates.";
             }
 
             bool isMoistureDrop = device.Category.Equals("Hydroponics", StringComparison.OrdinalIgnoreCase) && request.Reading < 20.0;
@@ -164,46 +252,111 @@ namespace Smart_X_Ecosystem.Services
 
             if (request.IsCriticalAlert || isMoistureDrop || isVoltageSpike)
             {
-                device.Status = "Alert";
-                DisconnectedNodes.Add(device.MacAddress);
-
-                if (isMoistureDrop)
+                lock (_syncLock)
                 {
-                    _lastTriggerEvent = "Moisture Sensor B < 20%";
-                    RecordedUserHistory.Add($"[SENSOR EVENT] {device.DeviceName} dropped to {request.Reading}% (< 20%)");
+                    _deviceFaultPackets[device.MacAddress] = _deviceFaultPackets.GetValueOrDefault(device.MacAddress, 0) + 1;
+                    string errCode = isMoistureDrop ? $"ERR_LOW_MOISTURE:{device.MacAddress}" :
+                                     isVoltageSpike ? $"ERR_OVERVOLTAGE:{device.MacAddress}" :
+                                     $"ERR_THRESHOLD:{device.MacAddress}";
+                    ActiveErrorStates.Add(errCode);
+
+                    if (isMoistureDrop)
+                    {
+                        _lastTriggerEvent = "Moisture Sensor B < 20%";
+                        RecordedUserHistory.Add($"[SENSOR EVENT] {device.DeviceName} dropped to {request.Reading}% (< 20%)");
+                    }
+
+                    packet.Priority = 1;
+                    packet.IsCritical = true;
+                    packet.EventType = "CRITICAL_TELEMETRY";
+                    CriticalAlertQueue.Enqueue(packet, 1);
                 }
 
-                string critMsg = $"[PRIORITY 1] Critical reading ({request.Reading}{device.Unit}) on {device.DeviceName} ({device.MacAddress})";
-                CriticalAlertQueue.Enqueue(critMsg, 1);
-                AddTimelineLog(critMsg);
-                return "Critical alert bypassed TelemetryQueue via CriticalAlertQueue (Priority 1).";
+                NotifyStateChanged();
+                return "Typed critical packet enqueued in CriticalAlertQueue (Priority 1) for immediate background processing.";
             }
 
-            device.Status = "Online";
-            DisconnectedNodes.Remove(device.MacAddress);
-            string stdMsg = $"[FIFO] {device.DeviceName} ({device.MacAddress}) reported {request.Reading}{device.Unit}";
-            TelemetryQueue.Enqueue(stdMsg);
-            AddTimelineLog(stdMsg);
-            return "Standard telemetry enqueued in TelemetryQueue (FIFO).";
+            lock (_syncLock)
+            {
+                packet.Priority = 2;
+                packet.IsCritical = false;
+                packet.EventType = "STANDARD_TELEMETRY";
+                TelemetryQueue.Enqueue(packet);
+            }
+
+            NotifyStateChanged();
+            return "Typed telemetry packet enqueued in TelemetryQueue (FIFO) for background worker processing.";
+        }
+
+        /// <summary>
+        /// Invoked automatically by TelemetryQueueWorker (BackgroundService).
+        /// Always drains CriticalAlertQueue (PriorityQueue) completely before dequeuing from TelemetryQueue (FIFO).
+        /// </summary>
+        public bool DequeueAndProcessNextPacketInBackground()
+        {
+            QueuedTelemetryPacket? packet = null;
+            int priority = 2;
+
+            lock (_syncLock)
+            {
+                if (!CriticalAlertQueue.TryDequeue(out packet, out priority))
+                {
+                    if (!TelemetryQueue.TryDequeue(out packet))
+                    {
+                        return false;
+                    }
+                    priority = packet.Priority;
+                }
+
+                if (DeviceRegistry.TryGetValue(packet.MacAddress, out var device))
+                {
+                    device.LastReading = packet.Value;
+                    device.LastUpdated = packet.Timestamp;
+
+                    if (packet.EventType == "DISCONNECT_FAULT")
+                    {
+                        device.Status = "Offline";
+                    }
+                    else if (packet.IsCritical)
+                    {
+                        device.Status = "Alert";
+                    }
+                    else
+                    {
+                        device.Status = "Online";
+                        DisconnectedNodes.Remove(device.MacAddress);
+                        ActiveErrorStates.RemoveWhere(e => e.EndsWith(device.MacAddress, StringComparison.OrdinalIgnoreCase));
+                        _topologyService.SetNodeOnlineState(device.MacAddress, true);
+                    }
+
+                    _topologyService.RecordLiveTelemetryInAvlTree(device);
+                }
+
+                TotalPacketsProcessedByWorker++;
+                LastBackgroundProcessedSummary =
+                    $"[Worker #{TotalPacketsProcessedByWorker} | P{priority} {packet.EventType}] {packet.DeviceName} ({packet.MacAddress}) = {packet.Value}{packet.Unit} @ {packet.Timestamp.ToLocalTime():HH:mm:ss.fff}";
+            }
+
+            AddTimelineReading(new TimelineEntry
+            {
+                MacAddress = packet.MacAddress,
+                DeviceName = packet.DeviceName,
+                Category = packet.Category,
+                Value = packet.Value,
+                Unit = packet.Unit,
+                EventType = packet.IsCritical ? $"PRIORITY_{priority}" : "FIFO_STD",
+                Summary = $"{packet.DeviceName} reported {packet.Value}{packet.Unit} ({packet.EventType})",
+                Timestamp = packet.Timestamp
+            });
+
+            NotifyStateChanged();
+            return true;
         }
 
         public string ProcessNextQueuedItem()
         {
-            if (CriticalAlertQueue.TryDequeue(out string? critAlert, out int priority))
-            {
-                string log = $"[DEQUEUED PRIORITY {priority}] {critAlert}";
-                AddTimelineLog(log);
-                return log;
-            }
-
-            if (TelemetryQueue.TryDequeue(out string? stdPacket))
-            {
-                string log = $"[DEQUEUED FIFO] {stdPacket}";
-                AddTimelineLog(log);
-                return log;
-            }
-
-            return "Both CriticalAlertQueue and TelemetryQueue are empty.";
+            bool processed = DequeueAndProcessNextPacketInBackground();
+            return processed ? LastBackgroundProcessedSummary : "Both CriticalAlertQueue and TelemetryQueue are empty.";
         }
 
         public void IssueManualOverride(string macAddress, string actionDescription, bool toggleRelay)
@@ -220,37 +373,77 @@ namespace Smart_X_Ecosystem.Services
                 IssuedAt = DateTime.UtcNow
             };
 
-            CommandUndoStack.Push(command);
-
-            if (toggleRelay)
+            lock (_syncLock)
             {
-                device.IsRelayActive = !device.IsRelayActive;
-            }
-            device.Status = "Online";
-            device.LastUpdated = DateTime.UtcNow;
-            DisconnectedNodes.Remove(device.MacAddress);
+                CommandUndoStack.Push(command);
 
-            RecordedUserHistory.Add($"[COMMAND] {device.DeviceName}: {actionDescription}");
-            RecordPatternInteraction(device.DeviceName);
-            AddTimelineLog($"[OVERRIDE] Executed '{actionDescription}' on {device.DeviceName}. Pushed to CommandUndoStack.");
+                if (toggleRelay)
+                {
+                    device.IsRelayActive = !device.IsRelayActive;
+                }
+                device.Status = "Online";
+                device.LastUpdated = DateTime.UtcNow;
+                DisconnectedNodes.Remove(device.MacAddress);
+                ActiveErrorStates.RemoveWhere(e => e.EndsWith(device.MacAddress, StringComparison.OrdinalIgnoreCase));
+                _topologyService.SetNodeOnlineState(device.MacAddress, true);
+
+                RecordedUserHistory.Add($"[COMMAND] {device.DeviceName}: {actionDescription}");
+                RecordPatternInteraction(device.DeviceName);
+            }
+
+            AddTimelineReading(new TimelineEntry
+            {
+                MacAddress = device.MacAddress,
+                DeviceName = device.DeviceName,
+                Category = device.Category,
+                Value = device.LastReading,
+                Unit = device.Unit,
+                EventType = "OVERRIDE",
+                Summary = $"Executed '{actionDescription}' on {device.DeviceName}",
+                Timestamp = DateTime.UtcNow
+            });
+
+            NotifyStateChanged();
         }
 
         public OverrideCommand? UndoLastCommand()
         {
-            if (CommandUndoStack.Count == 0 || !CommandUndoStack.TryPop(out var lastCommand))
-                return null;
+            OverrideCommand? lastCommand;
+            DeviceState? device = null;
 
-            if (DeviceRegistry.TryGetValue(lastCommand.TargetMac, out var device))
+            lock (_syncLock)
             {
-                device.IsRelayActive = lastCommand.PreviousRelayState;
-                device.Status = lastCommand.PreviousStatus;
-                if (device.Status != "Online")
+                if (CommandUndoStack.Count == 0 || !CommandUndoStack.TryPop(out lastCommand))
+                    return null;
+
+                if (DeviceRegistry.TryGetValue(lastCommand.TargetMac, out device))
                 {
-                    DisconnectedNodes.Add(device.MacAddress);
+                    device.IsRelayActive = lastCommand.PreviousRelayState;
+                    device.Status = lastCommand.PreviousStatus;
+                    if (device.Status != "Online")
+                    {
+                        DisconnectedNodes.Add(device.MacAddress);
+                        ActiveErrorStates.Add($"ERR_RESTORED_STATE:{device.MacAddress}");
+                    }
                 }
-                AddTimelineLog($"[UNDO] Reverted '{lastCommand.ActionDescription}' on {device.DeviceName} via CommandUndoStack.Pop().");
             }
 
+            if (device != null && lastCommand != null)
+            {
+                AddTimelineReading(new TimelineEntry
+                {
+                    MacAddress = device.MacAddress,
+                    DeviceName = device.DeviceName,
+                    Category = device.Category,
+                    Value = device.LastReading,
+                    Unit = device.Unit,
+                    EventType = "UNDO",
+                    Summary = $"Reverted '{lastCommand.ActionDescription}' on {device.DeviceName}",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            NotifyStateChanged();
             return lastCommand;
         }
 
@@ -258,10 +451,15 @@ namespace Smart_X_Ecosystem.Services
         {
             if (string.IsNullOrWhiteSpace(searchTerm)) return;
             string cleanTerm = searchTerm.Trim();
-            RecordedUserHistory.Add($"[SEARCH] '{cleanTerm}'");
 
-            _queryFrequency[cleanTerm] = _queryFrequency.GetValueOrDefault(cleanTerm, 0) + 1;
-            RecordPatternInteraction(cleanTerm);
+            lock (_syncLock)
+            {
+                RecordedUserHistory.Add($"[SEARCH] '{cleanTerm}'");
+                _queryFrequency[cleanTerm] = _queryFrequency.GetValueOrDefault(cleanTerm, 0) + 1;
+                RecordPatternInteraction(cleanTerm);
+            }
+
+            NotifyStateChanged();
         }
 
         private void RecordPatternInteraction(string currentEntity)
@@ -278,64 +476,94 @@ namespace Smart_X_Ecosystem.Services
             _lastTriggerEvent = currentEntity;
         }
 
+        /// <summary>
+        /// Computes every recommendation confidence strictly from observed counts (MatchedCount / TotalObservations * 100.0).
+        /// </summary>
         public List<PredictiveRecommendation> GetPredictiveRecommendations()
         {
             var recommendations = new List<PredictiveRecommendation>();
 
-            // Pattern 1: Moisture drop below 20% -> Suggest Pump A
-            if (DeviceRegistry.TryGetValue("00:1B:44:11:3A:B7", out var moistureSensor) && moistureSensor.LastReading < 20.0)
+            lock (_syncLock)
             {
-                int pumpPatternCount = 0;
-                if (_actionCoOccurrence.TryGetValue("Moisture Sensor B < 20%", out var transitions))
+                // 1. Co-occurrence pattern confidence computed strictly from transition counts
+                if (DeviceRegistry.TryGetValue("00:1B:44:11:3A:B7", out var moistureSensor) && moistureSensor.LastReading < 20.0)
                 {
-                    pumpPatternCount = transitions.Where(k => k.Key.Contains("Pump", StringComparison.OrdinalIgnoreCase)).Sum(k => k.Value);
-                }
+                    int pumpMatches = 0;
+                    int totalTransitionsFromDrop = 0;
 
-                recommendations.Add(new PredictiveRecommendation
-                {
-                    Title = "Automated Insight: Moisture Drop → Activate Pump A",
-                    Reason = $"Moisture Sensor B is at {moistureSensor.LastReading}% (< 20%). Recorded history shows operators search/trigger 'Pump A' after moisture drops ({pumpPatternCount} recorded pattern matches).",
-                    SuggestedCommand = "Switch ON Water Pump A (Irrigation Override)",
-                    TargetMac = "00:1B:44:11:3A:B8",
-                    Confidence = pumpPatternCount > 0 ? $"Learned Pattern ({92 + Math.Min(pumpPatternCount, 7)}%)" : "Threshold Rule (90%)"
-                });
-            }
+                    if (_actionCoOccurrence.TryGetValue("Moisture Sensor B < 20%", out var transitions))
+                    {
+                        totalTransitionsFromDrop = transitions.Values.Sum();
+                        pumpMatches = transitions
+                            .Where(k => k.Key.Contains("Pump", StringComparison.OrdinalIgnoreCase))
+                            .Sum(k => k.Value);
+                    }
 
-            // Pattern 2: Faulty node proactive highlights
-            foreach (var faultyMac in DisconnectedNodes)
-            {
-                if (DeviceRegistry.TryGetValue(faultyMac, out var faultyDevice) && faultyDevice.MacAddress != "00:1B:44:11:3A:B7")
-                {
+                    double computedConfidence = totalTransitionsFromDrop > 0
+                        ? Math.Round((double)pumpMatches / totalTransitionsFromDrop * 100.0, 1)
+                        : 0.0;
+
                     recommendations.Add(new PredictiveRecommendation
                     {
-                        Title = $"Faulty Node Highlight: {faultyDevice.DeviceName}",
-                        Reason = $"Device ({faultyDevice.MacAddress}) is currently in '{faultyDevice.Status}' state with reading {faultyDevice.LastReading}{faultyDevice.Unit}. Proactively surfaced before manual query.",
-                        SuggestedCommand = $"Reset & Toggle Relay on {faultyDevice.DeviceName}",
-                        TargetMac = faultyDevice.MacAddress,
-                        Confidence = "Fault Detection (96%)"
+                        Title = "Automated Insight: Moisture Drop → Activate Pump A",
+                        Reason = $"Moisture Sensor B is at {moistureSensor.LastReading}%. Co-occurrence count: {pumpMatches} 'Pump A' actions out of {totalTransitionsFromDrop} total post-drop actions.",
+                        SuggestedCommand = "Switch ON Water Pump A (Irrigation Override)",
+                        TargetMac = "00:1B:44:11:3A:B8",
+                        MatchedCount = pumpMatches,
+                        TotalObservations = totalTransitionsFromDrop,
+                        ConfidencePercentage = computedConfidence
                     });
                 }
-            }
 
-            // Pattern 3: Sequential behavioral co-occurrence from search/command transitions
-            if (!string.IsNullOrEmpty(_lastTriggerEvent) && _actionCoOccurrence.TryGetValue(_lastTriggerEvent, out var nextTargets))
-            {
-                var bestFollowUp = nextTargets.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
-                if (bestFollowUp.Value > 0)
+                // 2. Fault detection confidence computed strictly from fault packet counts vs total packets for that device
+                foreach (var errorState in ActiveErrorStates)
                 {
+                    var parts = errorState.Split(':');
+                    if (parts.Length < 2) continue;
+                    string errorType = parts[0];
+                    string faultyMac = string.Join(":", parts.Skip(1));
+
+                    if (DeviceRegistry.TryGetValue(faultyMac, out var faultyDevice) && faultyDevice.MacAddress != "00:1B:44:11:3A:B7")
+                    {
+                        int faultCount = _deviceFaultPackets.GetValueOrDefault(faultyMac, 1);
+                        int totalPackets = Math.Max(1, _deviceTotalPackets.GetValueOrDefault(faultyMac, 1));
+                        double computedFaultConfidence = Math.Round((double)faultCount / totalPackets * 100.0, 1);
+
+                        recommendations.Add(new PredictiveRecommendation
+                        {
+                            Title = $"Active Error State ({errorType}): {faultyDevice.DeviceName}",
+                            Reason = $"Fault ratio calculated from counts: {faultCount} anomalous packets out of {totalPackets} total packets received from {faultyDevice.MacAddress}.",
+                            SuggestedCommand = $"Reset & Toggle Relay on {faultyDevice.DeviceName}",
+                            TargetMac = faultyDevice.MacAddress,
+                            MatchedCount = faultCount,
+                            TotalObservations = totalPackets,
+                            ConfidencePercentage = computedFaultConfidence
+                        });
+                    }
+                }
+
+                // 3. Query Frequency & Sequential Follow-Up Confidence computed strictly from search/command counts
+                int totalSearches = _queryFrequency.Values.Sum();
+                if (totalSearches > 0)
+                {
+                    var topQuery = _queryFrequency.OrderByDescending(kvp => kvp.Value).First();
                     var matchedDevice = DeviceRegistry.Values.FirstOrDefault(d =>
-                        d.DeviceName.Contains(bestFollowUp.Key, StringComparison.OrdinalIgnoreCase) ||
-                        d.Category.Contains(bestFollowUp.Key, StringComparison.OrdinalIgnoreCase));
+                        d.DeviceName.Contains(topQuery.Key, StringComparison.OrdinalIgnoreCase) ||
+                        d.Category.Contains(topQuery.Key, StringComparison.OrdinalIgnoreCase) ||
+                        d.MacAddress.Contains(topQuery.Key, StringComparison.OrdinalIgnoreCase));
 
                     if (matchedDevice != null && recommendations.All(r => r.TargetMac != matchedDevice.MacAddress))
                     {
+                        double queryConfidence = Math.Round((double)topQuery.Value / totalSearches * 100.0, 1);
                         recommendations.Add(new PredictiveRecommendation
                         {
-                            Title = $"Learned Workflow: Next Action on {matchedDevice.DeviceName}",
-                            Reason = $"Based on your recorded history, after '{_lastTriggerEvent}', you followed up with '{bestFollowUp.Key}' ({bestFollowUp.Value}x).",
+                            Title = $"Frequent Operator Target: {matchedDevice.DeviceName}",
+                            Reason = $"Query frequency count: '{topQuery.Key}' accounted for {topQuery.Value} of {totalSearches} total recorded operator searches.",
                             SuggestedCommand = $"Toggle Smart Relay on {matchedDevice.DeviceName}",
                             TargetMac = matchedDevice.MacAddress,
-                            Confidence = "History Pattern (89%)"
+                            MatchedCount = topQuery.Value,
+                            TotalObservations = totalSearches,
+                            ConfidencePercentage = queryConfidence
                         });
                     }
                 }
@@ -343,5 +571,7 @@ namespace Smart_X_Ecosystem.Services
 
             return recommendations;
         }
+
+        public void NotifyStateChanged() => OnStreamUpdated?.Invoke();
     }
 }

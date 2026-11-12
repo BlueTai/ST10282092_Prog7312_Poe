@@ -4,7 +4,7 @@ namespace Smart_X_Ecosystem.Services
 {
     public class FirebaseAuthService
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient = new();
         private readonly string _apiKey;
 
         public bool IsAuthenticated { get; private set; }
@@ -13,9 +13,8 @@ namespace Smart_X_Ecosystem.Services
 
         public event Action? OnAuthStateChanged;
 
-        public FirebaseAuthService(HttpClient httpClient, IConfiguration config)
+        public FirebaseAuthService(IConfiguration config)
         {
-            _httpClient = httpClient;
             _apiKey = config["Firebase:WebApiKey"] ?? string.Empty;
         }
 

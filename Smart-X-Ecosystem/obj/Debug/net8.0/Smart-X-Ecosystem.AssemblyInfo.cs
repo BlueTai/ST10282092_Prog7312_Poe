@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Smart-X-Ecosystem")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3c275cd68f5a4e269f0f99a18bf2047947082860")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c06b575410a0d3f73df92047264e0620f9915984")]
 [assembly: System.Reflection.AssemblyProductAttribute("Smart-X-Ecosystem")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Smart-X-Ecosystem")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
