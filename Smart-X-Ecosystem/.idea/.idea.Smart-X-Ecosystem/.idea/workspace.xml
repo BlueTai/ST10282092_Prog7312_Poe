@@ -16,13 +16,47 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="40aa5b2c-bed6-43a0-9382-494d1bb60f18" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Smart-X-Ecosystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Smart-X-Ecosystem/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/CommandStream.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/CommandStream.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/Home.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/Home.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/_Imports.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/_Imports.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/CommandModels.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/CommandModels.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/CommandStreamService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/CommandStreamService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.exe" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.GeneratedMSBuildEditorConfig.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.csproj.CoreCompileInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.sourcelink.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/apphost.exe" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/apphost.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/ref/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/ref/Smart-X-Ecosystem.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/refint/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/refint/Smart-X-Ecosystem.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rpswa.dswa.cache.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Smart-X-Ecosystem.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Smart-X-Ecosystem.csproj.nuget.dgspec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.assets.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.packagespec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.restore.info" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/bluet/source/repos/BlueTai/ST10282092_Prog7312_Poe/Smart-X-Ecosystem" value="3M0us0WJ0Jmb7He7bgaGzvTNdu9" />
+    </persistenceIdMap>
   </component>
   <component name="DpaMonitoringSettings">
     <option name="firstShow" value="false" />
@@ -59,23 +93,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4167900841001009" />
-      <entry key="MS500" value="3.4716209420838258" />
-      <entry key="S2" value="11.044678258525396" />
-      <entry key="S5" value="20.06732814191883" />
-      <entry key="S10" value="26.034207297969292" />
-      <entry key="S30" value="31.583246764462935" />
-      <entry key="S60" value="33.23066040318101" />
-      <entry key="M2" value="34.09946481268135" />
-      <entry key="M5" value="34.67921959016353" />
-      <entry key="M10" value="35.89886119827005" />
-      <entry key="M15" value="38.03903978829943" />
-      <entry key="M30" value="44.17727206329887" />
-      <entry key="H1" value="50.76295341804233" />
-      <entry key="H2" value="55.63476845556995" />
-      <entry key="H4" value="58.60488252576699" />
-      <entry key="D1" value="61.40214745042503" />
-      <entry key="W1" value="61.91377422640738" />
+      <entry key="MS100" value="1.009846752537369" />
+      <entry key="MS500" value="2.0710411789467242" />
+      <entry key="S2" value="9.174489114527457" />
+      <entry key="S5" value="19.204702549518675" />
+      <entry key="S10" value="26.442581294119854" />
+      <entry key="S30" value="33.50962366208747" />
+      <entry key="S60" value="35.66230484726041" />
+      <entry key="M2" value="36.806934363072685" />
+      <entry key="M5" value="37.55999612208696" />
+      <entry key="M10" value="38.837176078126305" />
+      <entry key="M15" value="40.99553619065994" />
+      <entry key="M30" value="47.152116214720984" />
+      <entry key="H1" value="53.74855061812294" />
+      <entry key="H2" value="58.62689216881812" />
+      <entry key="H4" value="61.6007386675109" />
+      <entry key="D1" value="64.40142451739717" />
+      <entry key="W1" value="64.91367010656325" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -97,23 +131,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3628579567128996" />
-      <entry key="MS500" value="3.4410892725124835" />
-      <entry key="S2" value="11.019136764913792" />
-      <entry key="S5" value="20.048302096442228" />
-      <entry key="S10" value="26.021747708074557" />
-      <entry key="S30" value="31.57817578791154" />
-      <entry key="S60" value="33.22798837699018" />
-      <entry key="M2" value="34.09809277237675" />
-      <entry key="M5" value="34.67866016089938" />
-      <entry key="M10" value="35.89855936567305" />
-      <entry key="M15" value="38.03881065073704" />
-      <entry key="M30" value="44.17711696366382" />
-      <entry key="H1" value="50.76285403582572" />
-      <entry key="H2" value="55.634710677710615" />
-      <entry key="H4" value="58.60485117029879" />
-      <entry key="D1" value="61.402141837214984" />
-      <entry key="W1" value="61.9137734143988" />
+      <entry key="MS100" value="0.948362377055109" />
+      <entry key="MS500" value="1.9799896288310121" />
+      <entry key="S2" value="9.087679226227083" />
+      <entry key="S5" value="19.152399709385737" />
+      <entry key="S10" value="26.411318167681063" />
+      <entry key="S30" value="33.497667049265154" />
+      <entry key="S60" value="35.65610064806465" />
+      <entry key="M2" value="36.803772803225385" />
+      <entry key="M5" value="37.55871511757955" />
+      <entry key="M10" value="38.83651251568708" />
+      <entry key="M15" value="40.995065704846816" />
+      <entry key="M30" value="47.15184034265523" />
+      <entry key="H1" value="53.74839081992867" />
+      <entry key="H2" value="58.62680417362514" />
+      <entry key="H4" value="61.60069220065043" />
+      <entry key="D1" value="64.40141638520025" />
+      <entry key="W1" value="64.91366893468842" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -124,31 +158,50 @@
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
+  <component name="ProjectSessionTemplates">
+    <option name="panelTemplate">
+      <template>
+        <option name="ensembleEnabled" value="false" />
+        <option name="modeId" value="Agent" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_id" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="BACKGROUND" />
+        <option name="worktreeMode" value="WORKSPACE" />
+      </template>
+    </option>
+    <option name="version" value="1" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.Smart-X-Ecosystem: IIS Express.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.Smart-X-Ecosystem: IIS Express.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;studio.ml.bot.history.legacyLocationsMigrated&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.Smart-X-Ecosystem: IIS Express">
     <configuration name="Smart-X-Ecosystem: IIS Express" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/Smart-X-Ecosystem.csproj" />
