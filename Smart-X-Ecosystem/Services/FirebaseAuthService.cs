@@ -38,19 +38,29 @@ namespace Smart_X_Ecosystem.Services
             string cleanEmail = (email ?? string.Empty).Trim();
             string cleanPassword = (password ?? string.Empty).Trim();
 
-            if (string.IsNullOrWhiteSpace(cleanEmail) || !cleanEmail.Contains('@'))
+            if (string.IsNullOrWhiteSpace(cleanEmail))
             {
-                return (false, "Please enter a valid operator email address (e.g., operator@smartx.io).");
+                return (false, "Please enter your operator email address.");
             }
 
-            if (string.IsNullOrWhiteSpace(cleanPassword) || cleanPassword.Length < 6)
+            if (!cleanEmail.Contains('@') || !cleanEmail.Contains('.'))
             {
-                return (false, "Firebase requires passwords to be at least 6 characters long.");
+                return (false, "Please enter a valid email address format (for example: operator@smartx.io).");
+            }
+
+            if (string.IsNullOrWhiteSpace(cleanPassword))
+            {
+                return (false, "Please enter your password.");
+            }
+
+            if (cleanPassword.Length < 6)
+            {
+                return (false, "Your password is too short. Passwords must be at least 6 characters long.");
             }
 
             if (string.IsNullOrWhiteSpace(_apiKey))
             {
-                return (false, "Firebase WebApiKey is missing in appsettings.json.");
+                return (false, "Authentication service configuration is missing (Firebase WebApiKey).");
             }
 
             string url = $"https://identitytoolkit.googleapis.com/v1/accounts:{action}?key={_apiKey}";
@@ -68,26 +78,64 @@ namespace Smart_X_Ecosystem.Services
                     CurrentUserEmail = doc.RootElement.GetProperty("email").GetString() ?? cleanEmail;
                     IsAuthenticated = true;
                     OnAuthStateChanged?.Invoke();
-                    return (true, "Authenticated successfully via Firebase Identity Toolkit API.");
+                    return (true, "Signed in successfully.");
                 }
                 else
                 {
                     using var doc = JsonDocument.Parse(json);
-                    string errorMsg = doc.RootElement.GetProperty("error").GetProperty("message").GetString() ?? "Authentication failed.";
+                    string rawError = doc.RootElement.GetProperty("error").GetProperty("message").GetString() ?? "UNKNOWN_ERROR";
 
-                    // If user clicks "Create New Operator Account" for an email that already exists, automatically try signing them in
-                    if (action == "signUp" && errorMsg.Contains("EMAIL_EXISTS", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return await SendFirebaseAuthRequestAsync("signInWithPassword", cleanEmail, cleanPassword);
-                    }
-
-                    return (false, $"Firebase API Error: {errorMsg}");
+                    return (false, FormatFriendlyAuthError(rawError, action));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return (false, $"Network error contacting Firebase API: {ex.Message}");
+                return (false, "Unable to reach the authentication server. Please check your internet connection and try again.");
             }
+        }
+
+        private static string FormatFriendlyAuthError(string firebaseErrorCode, string action)
+        {
+            string code = firebaseErrorCode.ToUpperInvariant();
+
+            if (code.Contains("INVALID_LOGIN_CREDENTIALS") || code.Contains("INVALID_PASSWORD"))
+            {
+                return "Incorrect email or password. Please double-check your password or click 'Register New Operator' to create an account.";
+            }
+
+            if (code.Contains("EMAIL_NOT_FOUND"))
+            {
+                return "No operator account was found with this email address. Click 'Register New Operator' below to create one.";
+            }
+
+            if (code.Contains("EMAIL_EXISTS"))
+            {
+                return "An account with this email address already exists. Please click 'Sign In to Console' instead.";
+            }
+
+            if (code.Contains("WEAK_PASSWORD"))
+            {
+                return "Password is too weak. Please enter a stronger password with at least 6 characters.";
+            }
+
+            if (code.Contains("INVALID_EMAIL"))
+            {
+                return "The email address entered is not valid. Please check for typos (e.g., operator@smartx.io).";
+            }
+
+            if (code.Contains("TOO_MANY_ATTEMPTS_TRY_LATER"))
+            {
+                return "Too many unsuccessful sign-in attempts. Access has been temporarily paused for security—please try again in a few minutes.";
+            }
+
+            if (code.Contains("USER_DISABLED"))
+            {
+                return "This operator account has been disabled by an administrator.";
+            }
+
+            return action == "signUp"
+                ? "Could not register account. Please verify your email and password (minimum 6 characters)."
+                : "Sign-in failed. Please verify your email and password and try again.";
         }
 
         public void SignOut()

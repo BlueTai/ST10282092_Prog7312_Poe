@@ -40,8 +40,9 @@
                     <div class="card-body p-4 bg-white">
                         @if (!string.IsNullOrEmpty(AuthMessage))
                         {
-                            <div class="alert @(AuthSuccess ? "alert-success" : "alert-danger") small py-2 mb-3">
-                                @AuthMessage
+                            <div class="alert @(AuthSuccess ? "alert-success" : "alert-danger") d-flex align-items-start gap-2 small py-2 px-3 mb-3 rounded-3 shadow-sm" role="alert">
+                                <i class="bi @(AuthSuccess ? "bi-check-circle-fill" : "bi-exclamation-octagon-fill") mt-1 flex-shrink-0"></i>
+                                <div>@AuthMessage</div>
                             </div>
                         }
 

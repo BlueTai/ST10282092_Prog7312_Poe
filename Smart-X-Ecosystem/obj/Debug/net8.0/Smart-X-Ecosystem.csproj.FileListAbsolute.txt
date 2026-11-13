@@ -32,12 +32,3 @@ C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\ob
 C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.pdb
 C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-Ecosystem.genruntimeconfig.cache
 C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\ref\Smart-X-Ecosystem.dll
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\bin\Debug\net8.0\Smart-X-Ecosystem.runtimeconfig.dev.json
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\dotnet-watch\Microsoft.NET.Sdk.BlazorWeb.DotNetWatch.lib.module.js
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\dotnet-watch\Microsoft.NET.Sdk.BlazorWeb.DotNetWatch.BrowserTools.js
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\dotnet-watch\Microsoft.NET.Sdk.BlazorWeb.DotNetWatch.BrowserTools.Config.js
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\dotnet-watch\browser-tools-key.public.json
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\dotnet-watch\browser-tools-key.private.json
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\jsmodules\jsmodules.build.manifest.json
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\scopedcss\scopedcss.cache
-C:\Users\bluet\source\repos\BlueTai\ST10282092_Prog7312_Poe\Smart-X-Ecosystem\obj\Debug\net8.0\Smart-X-.A6239F2D.Up2Date
