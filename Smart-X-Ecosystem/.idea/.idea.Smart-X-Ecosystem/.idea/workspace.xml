@@ -16,34 +16,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="40aa5b2c-bed6-43a0-9382-494d1bb60f18" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Components/Layout/MainLayout.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Layout/MainLayout.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/CommandStream.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/CommandStream.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/Home.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/Home.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/Ingestion.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/Ingestion.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/NetworkTopology.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/NetworkTopology.razor" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.exe" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.staticwebassets.endpoints.json" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.staticwebassets.endpoints.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.staticwebassets.runtime.json" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.staticwebassets.runtime.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.csproj.FileListAbsolute.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.genruntimeconfig.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.genruntimeconfig.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.sourcelink.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Smart-X-Ecosystem.sourcelink.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/apphost.exe" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/apphost.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/dotnet-watch/Microsoft.NET.Sdk.BlazorWeb.DotNetWatch.BrowserTools.Config.js" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/dotnet-watch/Microsoft.NET.Sdk.BlazorWeb.DotNetWatch.BrowserTools.Config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/dotnet-watch/browser-tools-key.private.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/dotnet-watch/browser-tools-key.private.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/dotnet-watch/browser-tools-key.public.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/dotnet-watch/browser-tools-key.public.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/ref/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/ref/Smart-X-Ecosystem.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/refint/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/refint/Smart-X-Ecosystem.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjimswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjimswa.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rpswa.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.build.endpoints.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.build.endpoints.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.build.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.build.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.build.json.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.build.json.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.development.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/staticwebassets.development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Smart-X-Ecosystem.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Smart-X-Ecosystem.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.assets.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.restore.info" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -91,23 +91,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.0002527505306469" />
-      <entry key="MS500" value="1.2033962815031949" />
-      <entry key="S2" value="2.280924545331933" />
-      <entry key="S5" value="4.554450391205702" />
-      <entry key="S10" value="7.131019897047221" />
-      <entry key="S30" value="10.461926709524207" />
-      <entry key="S60" value="11.646243083991001" />
-      <entry key="M2" value="12.754409943683735" />
-      <entry key="M5" value="17.87696506141616" />
-      <entry key="M10" value="24.799638318220186" />
-      <entry key="M15" value="29.95469256854244" />
-      <entry key="M30" value="43.4134248226095" />
-      <entry key="H1" value="62.34551957956035" />
-      <entry key="H2" value="80.43500182033075" />
-      <entry key="H4" value="93.35847120347691" />
-      <entry key="D1" value="106.9209022162618" />
-      <entry key="W1" value="109.551934129172" />
+      <entry key="MS100" value="1.0000000003051086" />
+      <entry key="MS500" value="1.0146075920652444" />
+      <entry key="S2" value="1.9259059678779318" />
+      <entry key="S5" value="4.666693220919672" />
+      <entry key="S10" value="8.08314426012639" />
+      <entry key="S30" value="12.973838751678757" />
+      <entry key="S60" value="14.80998639132504" />
+      <entry key="M2" value="15.85636307545254" />
+      <entry key="M5" value="16.559129446368942" />
+      <entry key="M10" value="17.759668854133388" />
+      <entry key="M15" value="20.356024113187257" />
+      <entry key="M30" value="31.790914008923433" />
+      <entry key="H1" value="53.44855836836687" />
+      <entry key="H2" value="78.51471491352196" />
+      <entry key="H4" value="98.64658102266294" />
+      <entry key="D1" value="121.5591214569137" />
+      <entry key="W1" value="126.20292685530308" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -129,23 +129,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9140469541674882" />
-      <entry key="MS500" value="1.1792975958807816" />
-      <entry key="S2" value="2.2600851238651267" />
-      <entry key="S5" value="4.528277872496509" />
-      <entry key="S10" value="7.109668020930891" />
-      <entry key="S30" value="10.451808833087833" />
-      <entry key="S60" value="11.640701105065967" />
-      <entry key="M2" value="12.751483355004114" />
-      <entry key="M5" value="17.875656783804036" />
-      <entry key="M10" value="24.79890138487624" />
-      <entry key="M15" value="29.954157057694193" />
-      <entry key="M30" value="43.413090454924465" />
-      <entry key="H1" value="62.345300687481945" />
-      <entry key="H2" value="80.43486659313938" />
-      <entry key="H4" value="93.35839420089718" />
-      <entry key="D1" value="106.92088772170233" />
-      <entry key="W1" value="109.55193201223584" />
+      <entry key="MS100" value="0.9460576470142464" />
+      <entry key="MS500" value="1.0034187341890446" />
+      <entry key="S2" value="1.9204303155602847" />
+      <entry key="S5" value="4.660842689315507" />
+      <entry key="S10" value="8.07775962442017" />
+      <entry key="S30" value="12.970831946683978" />
+      <entry key="S60" value="14.808252524441434" />
+      <entry key="M2" value="15.855430227525606" />
+      <entry key="M5" value="16.55873718124524" />
+      <entry key="M10" value="17.759441221306275" />
+      <entry key="M15" value="20.35582861058657" />
+      <entry key="M30" value="31.79073280879301" />
+      <entry key="H1" value="53.4483968412871" />
+      <entry key="H2" value="78.51459473153363" />
+      <entry key="H4" value="98.64650530161856" />
+      <entry key="D1" value="121.55910588652458" />
+      <entry key="W1" value="126.202924545692" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

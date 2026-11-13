@@ -4,22 +4,24 @@
 @inject NavigationManager NavManager
 @inject FirebaseAuthService AuthService
 @inject CommandStreamService StreamService
-<PageTitle>Smart-X Enterprise IoT Platform</PageTitle>
+@inject MeshTopologyService TopologyService
+
+<PageTitle>Smart-X Industrial IoT Platform</PageTitle>
 
 <div class="container-fluid py-2">
     @if (!AuthService.IsAuthenticated)
     {
         <!-- HERO HEADER -->
-        <div class="p-4 p-md-5 mb-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0b192c 0%, #1e3e62 60%, #000000 100%);">
+        <div class="p-4 p-md-5 mb-4 text-white rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0b192c 0%, #1e3e62 60%, #09121d 100%);">
             <div class="row align-items-center">
-                <div class="col-lg-7">
+                <div class="col-lg-8">
                     <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-info bg-opacity-10 border border-info border-opacity-25 mb-3">
                         <span class="spinner-grow spinner-grow-sm text-info" role="status"></span>
-                        <small class="fw-semibold text-info">SMART-X INDUSTRIAL TELEMETRY & MESH ROUTING ENGINE v3.0</small>
+                        <small class="fw-semibold text-info">SMART-X INDUSTRIAL TELEMETRY &amp; MESH ORCHESTRATION</small>
                     </div>
-                    <h1 class="display-5 fw-bold mb-3">Next-Gen Edge Microcontroller & Self-Healing Mesh Orchestration</h1>
-                    <p class="lead text-light opacity-75 mb-4">
-                        Unified real-time ingestion, AES-256 encrypted batch provisioning, O(1) device state indexing, Prim's Minimum Spanning Tree routing, and AVL Tree historical analytics.
+                    <h1 class="display-5 fw-bold mb-3">Enterprise Edge Telemetry &amp; Self-Healing Mesh Control</h1>
+                    <p class="lead text-light opacity-75 mb-0">
+                        Real-time sensor ingestion, encrypted fleet provisioning, automated priority alert processing, and resilient multi-hop mesh routing in one unified control plane.
                     </p>
                 </div>
             </div>
@@ -30,9 +32,9 @@
             <div class="col-md-7 col-lg-5 col-xl-4">
                 <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
                     <div class="card-header bg-gradient bg-primary text-white p-4 text-center">
-                        <span class="badge bg-white text-primary px-3 py-1 rounded-pill fw-semibold shadow-sm mb-2">SECURE GATEWAY</span>
-                        <h4 class="fw-bold mb-1">Operator Portal</h4>
-                        <p class="text-white-50 small mb-0">Sign in via Firebase to unlock all 3 IoT modules</p>
+                        <span class="badge bg-white text-primary px-3 py-1 rounded-pill fw-semibold shadow-sm mb-2">IDENTITY GATEWAY</span>
+                        <h4 class="fw-bold mb-1">Operator Sign In</h4>
+                        <p class="text-white-50 small mb-0">Authenticate to access the Smart-X Control Plane</p>
                     </div>
 
                     <div class="card-body p-4 bg-white">
@@ -49,19 +51,19 @@
                         </div>
 
                         <div class="mb-4">
-                            <label class="form-label text-secondary fw-semibold small">Password (min 6 chars)</label>
+                            <label class="form-label text-secondary fw-semibold small">Password</label>
                             <input type="password" class="form-control" placeholder="••••••••" @bind="Password" @bind:event="oninput" />
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-primary py-2 fw-semibold" @onclick="HandleSignIn" disabled="@IsBusy">
-                                @(IsBusy ? "Authenticating..." : "Sign In to Dashboard")
+                                @(IsBusy ? "Authenticating..." : "Sign In to Console")
                             </button>
                             <button type="button" class="btn btn-outline-secondary py-2 small" @onclick="HandleSignUp" disabled="@IsBusy">
-                                Create New Operator Account
+                                Register New Operator
                             </button>
                             <button type="button" class="btn btn-sm btn-link text-decoration-none mt-1" @onclick="SignInWithDemoAccount" disabled="@IsBusy">
-                                ⚡ Instant Demo Operator Login (testoperator@smartx.io)
+                                ⚡ Quick Demo Operator Access (testoperator@smartx.io)
                             </button>
                         </div>
                     </div>
@@ -71,29 +73,29 @@
     }
     else
     {
-        <!-- STATEFUL SINGLE-PAGE PILLAR WORKSPACE BAR (ZERO STATE LOSS ON SWITCH) -->
+        <!-- UNIFIED OPERATOR WORKSPACE NAVIGATION BAR -->
         <div class="card shadow-sm border-0 mb-4 bg-dark text-white">
             <div class="card-body py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div class="d-flex flex-wrap gap-2">
                     <button class="btn @(ActivePillar == 1 ? "btn-primary fw-bold" : "btn-outline-light")" @onclick="() => ActivePillar = 1">
-                        <i class="bi bi-cloud-arrow-up me-1"></i> Pillar 1: Sensor Data Ingestion
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Device Provisioning &amp; Ingestion
                     </button>
                     <button class="btn @(ActivePillar == 2 ? "btn-success fw-bold" : "btn-outline-light")" @onclick="() => ActivePillar = 2">
-                        <i class="bi bi-activity me-1"></i> Pillar 2: Real-Time Command Stream
+                        <i class="bi bi-activity me-1"></i> Live Telemetry &amp; Command Stream
                     </button>
                     <button class="btn @(ActivePillar == 3 ? "btn-info text-dark fw-bold" : "btn-outline-light")" @onclick="() => ActivePillar = 3">
-                        <i class="bi bi-diagram-3 me-1"></i> Pillar 3: Network Topology & Mesh Routing
+                        <i class="bi bi-diagram-3 me-1"></i> Mesh Topology &amp; Routing
                     </button>
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
-                    <small class="text-white-50">Authenticated: <code class="text-info">@AuthService.CurrentUserEmail</code></small>
+                    <small class="text-white-50">Operator: <code class="text-info">@AuthService.CurrentUserEmail</code></small>
                     <button class="btn btn-sm btn-outline-danger" @onclick="AuthService.SignOut">Sign Out</button>
                 </div>
             </div>
         </div>
 
-        <!-- RENDER ACTIVE PILLAR INLINE WITHOUT ROUTE RELOAD -->
+        <!-- RENDER ACTIVE WORKSPACE VIEW INLINE WITHOUT ROUTE RELOAD -->
         @if (ActivePillar == 1)
         {
             <Ingestion />
@@ -110,7 +112,7 @@
 </div>
 
 @code {
-    private int ActivePillar { get; set; } = 3; // Default to Module 3 (Final PoE) or switch seamlessly
+    private int ActivePillar { get; set; } = 2;
     private string Email { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private string AuthMessage { get; set; } = string.Empty;

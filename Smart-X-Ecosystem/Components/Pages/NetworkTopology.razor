@@ -9,15 +9,15 @@
 @inject NavigationManager NavManager
 @implements IDisposable
 
-<PageTitle>Network Topology & Self-Healing Mesh</PageTitle>
+<PageTitle>Mesh Network Map &amp; Failover Routing</PageTitle>
 
 @if (!AuthService.IsAuthenticated)
 {
     <div class="container mt-5">
         <div class="alert alert-warning shadow-sm">
             <h5>🔒 Authentication Required</h5>
-            <p class="mb-2">Please authenticate via Firebase on the Home page to access Network Topology &amp; Mesh Routing.</p>
-            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Go to Login</button>
+            <p class="mb-2">Please sign in on the Console page to access the Mesh Network Map &amp; Routing controls.</p>
+            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Go to Sign In</button>
         </div>
     </div>
 }
@@ -29,12 +29,12 @@ else
     <div class="container-fluid py-2">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <div>
-                <h2 class="fw-bold text-primary mb-0">Network Topology &amp; Self-Healing Mesh Routing (Module 3)</h2>
-                <p class="text-muted mb-0">Weighted Adjacency List, BFS/DFS Subnet Traversals, Prim's MST via BinaryMinHeap &amp; HistoricalAvlTree Range Queries</p>
+                <h2 class="fw-bold text-primary mb-0">Mesh Network Topology &amp; Failover Routing</h2>
+                <p class="text-muted mb-0">Live Backbone Optimization, Multi-Hop Failover Simulation &amp; Historical Telemetry Archive</p>
             </div>
             <div class="d-flex gap-2">
-                <span class="badge bg-info text-dark">AVL Nodes: @TopologyService.AvlRecordCount (Height: @TopologyService.HistoricalAvlTree.TreeHeight | Rotations: @TopologyService.AvlRotationsPerformed)</span>
-                <span class="badge bg-success">Prim's MST Links: @mstEdges.Count (@mstTotalCost ms)</span>
+                <span class="badge bg-info text-dark">Indexed Records: @TopologyService.AvlRecordCount (Tree Height: @TopologyService.HistoricalAvlTree.TreeHeight | Rebalances: @TopologyService.AvlRotationsPerformed)</span>
+                <span class="badge bg-success">Active Backbone Links: @mstEdges.Count (@mstTotalCost ms)</span>
             </div>
         </div>
 
@@ -43,10 +43,10 @@ else
             <div class="col-lg-8">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">Interactive Self-Healing Mesh Graph (Green = Prim's MST | Amber = Active Multi-Hop Route)</span>
+                        <span class="fw-bold">Live Mesh Topology Map (Green = Primary Backbone | Amber = Active Packet Route)</span>
                         <div class="form-check form-switch mb-0">
                             <input class="form-check-input" type="checkbox" id="mstToggle" @bind="ShowMstOverlay" />
-                            <label class="form-check-label small text-light" for="mstToggle">Highlight Prim's MST</label>
+                            <label class="form-check-label small text-light" for="mstToggle">Show Optimal Backbone (MST)</label>
                         </div>
                     </div>
                     <div class="card-body">
@@ -100,15 +100,15 @@ else
                 </div>
             </div>
 
-            <!-- DIJKSTRA FAILOVER ROUTING & BFS/DFS SUBNET TRAVERSALS -->
+            <!-- FAILOVER ROUTING & SUBNET DISCOVERY -->
             <div class="col-lg-4">
                 <div class="card shadow-sm mb-3">
                     <div class="card-header bg-primary text-white fw-bold">
-                        Self-Healing Multi-Hop Failover Simulator
+                        Multi-Hop Failover Route Analyzer
                     </div>
                     <div class="card-body">
                         <div class="mb-2">
-                            <label class="form-label small fw-bold">Source Node</label>
+                            <label class="form-label small fw-bold">Origin Endpoint</label>
                             <select class="form-select form-select-sm" @bind="SourceMac">
                                 @foreach (var n in TopologyService.Nodes.Values)
                                 {
@@ -117,7 +117,7 @@ else
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-bold">Destination Node</label>
+                            <label class="form-label small fw-bold">Target Endpoint</label>
                             <select class="form-select form-select-sm" @bind="TargetMac">
                                 @foreach (var n in TopologyService.Nodes.Values)
                                 {
@@ -126,36 +126,36 @@ else
                             </select>
                         </div>
                         <button class="btn btn-primary btn-sm w-100 fw-bold" @onclick="CalculateShortestRoute">
-                            Compute Optimal Failover Route
+                            Trace Optimal Path
                         </button>
 
                         @if (HighlightedPath.Count > 0)
                         {
                             <div class="alert alert-success small mt-3 mb-0 py-2">
-                                <strong>Optimal Path (@RouteCost ms):</strong><br />
+                                <strong>Active Route (@RouteCost ms latency):</strong><br />
                                 @string.Join(" → ", HighlightedPath.Select(m => TopologyService.Nodes.TryGetValue(m, out var nd) ? nd.DeviceName : m))
                             </div>
                         }
                         else if (RouteSearched)
                         {
                             <div class="alert alert-danger small mt-3 mb-0 py-2">
-                                No active route available (target or intermediate gateway offline).
+                                Endpoint unreachable (target or intermediate router offline).
                             </div>
                         }
                     </div>
                 </div>
 
-                <!-- BFS & DFS SUBNET TRAVERSAL DIAGNOSTICS -->
+                <!-- SUBNET DISCOVERY DIAGNOSTICS -->
                 <div class="card shadow-sm">
                     <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>BFS / DFS Subnet Traversal</span>
+                        <span>Subnet Topology Sweep</span>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-info btn-sm" @onclick="RunBfsTraversal">Run BFS</button>
-                            <button class="btn btn-outline-warning btn-sm" @onclick="RunDfsTraversal">Run DFS</button>
+                            <button class="btn btn-outline-info btn-sm" @onclick="RunBfsTraversal">Breadth-First</button>
+                            <button class="btn btn-outline-warning btn-sm" @onclick="RunDfsTraversal">Depth-First</button>
                         </div>
                     </div>
                     <div class="card-body p-2">
-                        <div class="small text-muted mb-1">Mode: <strong>@TraversalMode</strong> (@TraversalOrder.Count reachable online nodes)</div>
+                        <div class="small text-muted mb-1">Sweep Strategy: <strong>@TraversalMode</strong> (@TraversalOrder.Count online nodes)</div>
                         <div class="small bg-light p-2 rounded border" style="max-height: 110px; overflow-y: auto;">
                             @string.Join(" ➔ ", TraversalOrder.Select(n => n.DeviceName))
                         </div>
@@ -164,18 +164,18 @@ else
             </div>
         </div>
 
-        <!-- HISTORICAL AVL TREE O(log n + k) TIME-WINDOW RANGE QUERY (INCLUDING 14:00–16:00 WINDOW) -->
+        <!-- HISTORICAL TELEMETRY TIME-WINDOW ARCHIVE -->
         <div class="card shadow-sm">
             <div class="card-header bg-secondary text-white d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span class="fw-bold">
-                    🌲 Self-Balancing <code>HistoricalAvlTree</code> — O(log n + k) Time-Window Range Query
+                    🌲 Indexed Telemetry Time-Window Explorer
                 </span>
                 <div class="d-flex flex-wrap align-items-center gap-2">
                     <button class="btn btn-sm @(Use14To16Window ? "btn-warning fw-bold" : "btn-outline-light")" @onclick="Query14To16Window">
-                        🕒 Query 14:00 – 16:00 Window
+                        🕒 14:00 – 16:00 Shift Window
                     </button>
                     <button class="btn btn-sm @(!Use14To16Window ? "btn-info fw-bold text-dark" : "btn-outline-light")" @onclick="() => Use14To16Window = false">
-                        🔄 Live Lookback Window
+                        🔄 Rolling Live Window
                     </button>
                     @if (!Use14To16Window)
                     {
@@ -183,7 +183,7 @@ else
                             <option value="5">Last 5 Minutes</option>
                             <option value="15">Last 15 Minutes</option>
                             <option value="60">Last 60 Minutes</option>
-                            <option value="1440">All Today (24 Hours)</option>
+                            <option value="1440">Last 24 Hours</option>
                         </select>
                     }
                 </div>
@@ -202,7 +202,7 @@ else
                 }
                 @if (windowRecords.Count == 0)
                 {
-                    <p class="text-muted small p-3 mb-0">No AVL telemetry records within the selected time window.</p>
+                    <p class="text-muted small p-3 mb-0">No telemetry records found within the selected time window.</p>
                 }
                 else
                 {
@@ -210,12 +210,12 @@ else
                         <table class="table table-sm table-hover align-middle mb-0 small">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Local Timestamp</th>
+                                    <th>Timestamp</th>
                                     <th>Seq #</th>
                                     <th>MAC Address</th>
                                     <th>Device Name</th>
-                                    <th>Category</th>
-                                    <th>Reading (HistoricalReading)</th>
+                                    <th>Subsystem</th>
+                                    <th>Recorded Value</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -246,7 +246,7 @@ else
     private double RouteCost { get; set; }
     private bool RouteSearched { get; set; }
     private bool ShowMstOverlay { get; set; } = true;
-    private string TraversalMode { get; set; } = "BFS (Breadth-First Search)";
+    private string TraversalMode { get; set; } = "Breadth-First Sweep";
     private List<MeshVertex> TraversalOrder { get; set; } = new();
     private int LookbackMinutes { get; set; } = 1440;
     private bool Use14To16Window { get; set; } = true;
@@ -268,7 +268,7 @@ else
                 HighlightedPath = res.Path;
                 RouteCost = res.TotalCost;
             }
-            if (TraversalMode.StartsWith("BFS"))
+            if (TraversalMode.StartsWith("Breadth"))
                 TraversalOrder = TopologyService.TraverseSubnetBfs(SourceMac);
             else
                 TraversalOrder = TopologyService.TraverseSubnetDfs(SourceMac);
@@ -293,13 +293,13 @@ else
 
     private void RunBfsTraversal()
     {
-        TraversalMode = "BFS (Breadth-First Search)";
+        TraversalMode = "Breadth-First Sweep";
         TraversalOrder = TopologyService.TraverseSubnetBfs(SourceMac);
     }
 
     private void RunDfsTraversal()
     {
-        TraversalMode = "DFS (Depth-First Search)";
+        TraversalMode = "Depth-First Sweep";
         TraversalOrder = TopologyService.TraverseSubnetDfs(SourceMac);
     }
 

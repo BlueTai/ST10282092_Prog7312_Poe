@@ -4,55 +4,53 @@
 
 <div class="sidebar-brand text-white text-decoration-none">
     <div class="d-flex align-items-center gap-2">
-        <div class="bg-primary rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-            <i class="bi bi-lightning-charge-fill text-white fs-6"></i>
+        <div class="bg-primary rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; flex-shrink: 0;">
+            <i class="bi bi-lightning-charge-fill text-white" style="font-size: 1rem; line-height: 1; margin: 0;"></i>
         </div>
-        <span>Smart-X Cloud</span>
+        <span class="fw-bold text-nowrap">Smart-X Cloud</span>
     </div>
 </div>
 
 <div class="nav-scrollable">
-    <nav class="flex-column">
-        
-        <div class="sidebar-heading">Portal</div>
+    <nav class="d-flex flex-column gap-1">
+        <div class="sidebar-heading">Control Center</div>
         <div class="nav-item">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <i class="bi bi-grid-1x2"></i>
-                <span>Home & Auth</span>
+            <NavLink class="nav-link d-flex align-items-center gap-3 text-nowrap" href="" Match="NavLinkMatch.All" style="height: auto; line-height: 1.4; padding: 0.65rem 0.9rem;">
+                <i class="bi bi-grid-1x2" style="width: auto; height: auto; margin: 0; top: 0; font-size: 1.1rem; line-height: 1;"></i>
+                <span>Command Console</span>
             </NavLink>
         </div>
 
         @if (AuthService.IsAuthenticated)
         {
-            <div class="sidebar-heading mt-4">Active Modules</div>
+            <div class="sidebar-heading mt-3">Platform Operations</div>
 
             <div class="nav-item">
-                <NavLink class="nav-link" href="ingestion">
-                    <i class="bi bi-cloud-arrow-up"></i>
-                    <span>Data Ingestion</span>
+                <NavLink class="nav-link d-flex align-items-center gap-3 text-nowrap" href="ingestion" style="height: auto; line-height: 1.4; padding: 0.65rem 0.9rem;">
+                    <i class="bi bi-cloud-arrow-up" style="width: auto; height: auto; margin: 0; top: 0; font-size: 1.1rem; line-height: 1;"></i>
+                    <span>Device Provisioning</span>
                 </NavLink>
             </div>
 
             <div class="nav-item">
-                <NavLink class="nav-link" href="command-stream">
-                    <i class="bi bi-activity"></i>
-                    <span>Command Stream</span>
+                <NavLink class="nav-link d-flex align-items-center gap-3 text-nowrap" href="command-stream" style="height: auto; line-height: 1.4; padding: 0.65rem 0.9rem;">
+                    <i class="bi bi-activity" style="width: auto; height: auto; margin: 0; top: 0; font-size: 1.1rem; line-height: 1;"></i>
+                    <span>Telemetry &amp; Controls</span>
                 </NavLink>
             </div>
 
-            <div class="sidebar-heading mt-4">Final PoE</div>
             <div class="nav-item">
-                <NavLink class="nav-link" href="topology">
-                    <i class="bi bi-diagram-3"></i>
-                    <span>Network Topology</span>
+                <NavLink class="nav-link d-flex align-items-center gap-3 text-nowrap" href="topology" style="height: auto; line-height: 1.4; padding: 0.65rem 0.9rem;">
+                    <i class="bi bi-diagram-3" style="width: auto; height: auto; margin: 0; top: 0; font-size: 1.1rem; line-height: 1;"></i>
+                    <span>Mesh Network Map</span>
                 </NavLink>
             </div>
         }
         else
         {
             <div class="mt-4 p-3 mx-2 rounded-3 bg-white bg-opacity-10 border border-white border-opacity-10 text-center">
-                <i class="bi bi-shield-lock text-warning fs-4 mb-2 d-block"></i>
-                <span class="small text-white-50">Sign in on the Home page to unlock system modules.</span>
+                <i class="bi bi-shield-lock text-warning fs-4 mb-2 d-block" style="width: auto; height: auto; margin: 0 auto; top: 0;"></i>
+                <span class="small text-white-50">Sign in to access live telemetry, device provisioning, and mesh routing.</span>
             </div>
         }
     </nav>

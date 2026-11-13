@@ -10,15 +10,15 @@
 @inject HttpClient Http
 @implements IDisposable
 
-<PageTitle>Real-Time Command Stream</PageTitle>
+<PageTitle>Live Telemetry &amp; Command Stream</PageTitle>
 
 @if (!AuthService.IsAuthenticated)
 {
     <div class="container mt-5">
         <div class="alert alert-warning shadow-sm">
             <h5>🔒 Authentication Required</h5>
-            <p class="mb-2">Please authenticate via Firebase on the Home page to access the Real-Time Command Stream.</p>
-            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Go to Login</button>
+            <p class="mb-2">Please sign in on the Console page to access Live Telemetry &amp; Controls.</p>
+            <button class="btn btn-primary btn-sm" @onclick='() => NavManager.NavigateTo("/")'>Go to Sign In</button>
         </div>
     </div>
 }
@@ -27,11 +27,11 @@ else
     <div class="container-fluid py-2">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <div>
-                <h2 class="fw-bold text-primary mb-0">Real-Time Command Stream & History (Module 2)</h2>
-                <p class="text-muted mb-0">Typed Packet Queues, Automated BackgroundService Worker, Composite-Key Timeline Chart & Count-Based Predictive Engine</p>
+                <h2 class="fw-bold text-primary mb-0">Live Telemetry &amp; Command Stream</h2>
+                <p class="text-muted mb-0">Real-Time Event Pipeline, Automated Priority Dispatch, Sensor Trend Analytics &amp; Predictive Diagnostics</p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-dark">Worker Processed: @StreamService.TotalPacketsProcessedByWorker packets</span>
+                <span class="badge bg-dark">Processed Packets: @StreamService.TotalPacketsProcessedByWorker</span>
                 <span class="badge bg-success">Operator: @AuthService.CurrentUserEmail</span>
             </div>
         </div>
@@ -39,24 +39,24 @@ else
         <div class="alert alert-secondary py-2 px-3 small d-flex justify-content-between align-items-center mb-3">
             <div>
                 <span class="spinner-grow spinner-grow-sm text-success me-2" role="status"></span>
-                <strong>TelemetryQueueWorker (BackgroundService):</strong> <code>@StreamService.LastBackgroundProcessedSummary</code>
+                <strong>Background Ingestion Worker:</strong> <code>@StreamService.LastBackgroundProcessedSummary</code>
             </div>
-            <span class="badge bg-primary">Drains PriorityQueue First (1.5s tick)</span>
+            <span class="badge bg-primary">Priority Alerts Drained First (1.5s cycle)</span>
         </div>
 
         @if (!string.IsNullOrEmpty(StatusBanner))
         {
             <div class="alert alert-info alert-dismissible fade show shadow-sm py-2" role="alert">
-                <strong>System Event:</strong> @StatusBanner
+                <strong>System Notification:</strong> @StatusBanner
                 <button type="button" class="btn-close" @onclick="() => StatusBanner = string.Empty"></button>
             </div>
         }
 
-        <!-- 1. PREDICTIVE ACTION ENGINE (COUNT-COMPUTED CONFIDENCE) -->
+        <!-- 1. PREDICTIVE ACTION ENGINE -->
         <div class="card border-warning shadow-sm mb-4">
             <div class="card-header bg-warning bg-opacity-25 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 fw-bold text-dark">⚡ Suggested Actions & Automated Insights (Count-Computed Confidence)</h5>
-                <small class="text-muted">Recorded Interactions: @StreamService.RecordedUserHistory.Count</small>
+                <h5 class="mb-0 fw-bold text-dark">⚡ Predictive Diagnostics &amp; Recommended Actions</h5>
+                <small class="text-muted">Logged Operator Events: @StreamService.RecordedUserHistory.Count</small>
             </div>
             <div class="card-body">
                 @{
@@ -64,7 +64,7 @@ else
                 }
                 @if (recommendations.Count == 0)
                 {
-                    <p class="text-muted mb-0">All nodes nominal. Simulate a sensor drop or record a search query to compute predictive actions.</p>
+                    <p class="text-muted mb-0">All subsystems operating within nominal thresholds. No immediate operator intervention required.</p>
                 }
                 else
                 {
@@ -77,13 +77,13 @@ else
                                         <div class="d-flex justify-content-between align-items-start">
                                             <h6 class="fw-bold text-danger mb-1">@rec.Title</h6>
                                             <span class="badge bg-dark">
-                                                @rec.ConfidencePercentage.ToString("0.0")% (@rec.MatchedCount / @rec.TotalObservations counts)
+                                                @rec.ConfidencePercentage.ToString("0.0")% Confidence (@rec.MatchedCount/@rec.TotalObservations)
                                             </span>
                                         </div>
                                         <p class="small text-muted mb-2">@rec.Reason</p>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <code class="small">Target: @rec.TargetMac</code>
+                                        <code class="small">Node: @rec.TargetMac</code>
                                         <button class="btn btn-sm btn-warning fw-bold" @onclick="() => ExecuteRecommendedAction(rec)">
                                             Execute: @rec.SuggestedCommand
                                         </button>
@@ -96,44 +96,44 @@ else
             </div>
         </div>
 
-        <!-- 2. TYPED PACKET QUEUES & LIFO UNDO STACK -->
+        <!-- 2. PACKET QUEUES & COMMAND ROLLBACK HISTORY -->
         <div class="row g-4 mb-4">
             <div class="col-lg-7">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                        <span>Typed Packet Queues (QueuedTelemetryPacket)</span>
-                        <span class="badge bg-light text-primary">Auto-Drained by BackgroundService</span>
+                        <span>Ingestion Pipeline &amp; Fault Simulation Controls</span>
+                        <span class="badge bg-light text-primary">Automated Worker Active</span>
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <button class="btn btn-outline-primary btn-sm" @onclick="SimulateStandardPacket">
-                                + Enqueue Normal Packet (FIFO)
+                                + Standard Reading
                             </button>
                             <button class="btn btn-danger btn-sm" @onclick="SimulateMoistureDrop">
-                                ⚠️ Enqueue Moisture &lt; 20% (Priority 1)
+                                ⚠️ Low Moisture Alert (&lt; 20%)
                             </button>
                             <button class="btn btn-warning btn-sm text-dark" @onclick="SimulatePowerSpike">
-                                ⚡ Enqueue 450V Spike (Priority 1)
+                                ⚡ 450V Grid Surge Alert
                             </button>
                             <button class="btn btn-secondary btn-sm" @onclick="SimulateDisconnect">
-                                🔌 Simulate Disconnect (HashSets)
+                                🔌 Node Dropoff Event
                             </button>
                             <button class="btn btn-dark btn-sm" @onclick="SimulateBurstPriorityBypass">
-                                🚀 Queue 3 FIFO + 1 Priority (Watch Worker Bypass)
+                                🚀 High-Load Priority Preemption Test
                             </button>
                         </div>
 
                         <div class="row g-2">
                             <div class="col-md-6">
                                 <div class="p-2 border rounded bg-danger bg-opacity-10 d-flex justify-content-between fw-bold text-danger">
-                                    <span>CriticalAlertQueue (PriorityQueue)</span>
-                                    <span>@StreamService.CriticalAlertQueue.Count pending</span>
+                                    <span>Critical Alert Queue (Priority 1)</span>
+                                    <span>@StreamService.CriticalAlertQueue.Count queued</span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="p-2 border rounded bg-primary bg-opacity-10 d-flex justify-content-between fw-bold text-primary">
-                                    <span>TelemetryQueue (Queue&lt;Packet&gt;)</span>
-                                    <span>@StreamService.TelemetryQueue.Count pending</span>
+                                    <span>Standard Telemetry Stream</span>
+                                    <span>@StreamService.TelemetryQueue.Count queued</span>
                                 </div>
                             </div>
                         </div>
@@ -144,15 +144,15 @@ else
             <div class="col-lg-5">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                        <span class="fw-bold">CommandUndoStack (Stack&lt;OverrideCommand&gt;)</span>
+                        <span class="fw-bold">Operator Command Rollback Stack</span>
                         <button class="btn btn-sm btn-outline-warning" @onclick="UndoLastOverride">
-                            ↩ Undo Last Command (@StreamService.CommandUndoStack.Count)
+                            ↩ Revert Last Command (@StreamService.CommandUndoStack.Count)
                         </button>
                     </div>
                     <div class="card-body p-2" style="max-height: 170px; overflow-y: auto;">
                         @if (StreamService.CommandUndoStack.Count == 0)
                         {
-                            <p class="text-muted small text-center my-4">CommandUndoStack is empty. Issue a manual override below.</p>
+                            <p class="text-muted small text-center my-4">No manual overrides issued in this session.</p>
                         }
                         else
                         {
@@ -164,7 +164,7 @@ else
                                             <strong>@cmd.DeviceName</strong>: @cmd.ActionDescription
                                             <div class="text-muted" style="font-size: 0.75rem;">@cmd.TargetMac | @cmd.IssuedAt.ToLocalTime().ToString("HH:mm:ss")</div>
                                         </div>
-                                        <span class="badge bg-secondary">FILO</span>
+                                        <span class="badge bg-secondary">Revertible</span>
                                     </li>
                                 }
                             </ul>
@@ -174,13 +174,13 @@ else
             </div>
         </div>
 
-        <!-- 3. LIVE CHART FROM STRUCTURED SENSORTIMELINE (TIMELINEKEY: TIME + SEQUENCE) -->
+        <!-- 3. LIVE TELEMETRY TREND CHART -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-dark">
-                    📈 Live Telemetry Chart — Plotted from <code>SortedDictionary&lt;TimelineKey, TimelineEntry&gt;</code>
+                    📈 Real-Time Sensor Telemetry Trend
                 </span>
-                <span class="badge bg-primary">Composite Key: Timestamp + Sequence (Zero Overwrites)</span>
+                <span class="badge bg-primary">High-Resolution Sequenced Stream</span>
             </div>
             <div class="card-body">
                 @{
@@ -213,24 +213,24 @@ else
             </div>
         </div>
 
-        <!-- 4. DEVICEREGISTRY O(1) TABLE & DUAL HASHSETS (DISCONNECTEDNODES + ACTIVEERRORSTATES) -->
+        <!-- 4. DEVICE REGISTRY & ACTIVE FAULT MONITORS -->
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="card shadow-sm">
                     <div class="card-header bg-light">
                         <div class="row g-2 align-items-center">
                             <div class="col-md-4 fw-bold">
-                                DeviceRegistry (O(1) Dictionary)
+                                Connected Fleet Directory
                             </div>
                             <div class="col-md-4">
                                 <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control" placeholder="Search (e.g. Pump A)..." @bind="SearchQuery" @bind:event="oninput" />
-                                    <button class="btn btn-primary" @onclick="LogSearchPattern">Record Search</button>
+                                    <input type="text" class="form-control" placeholder="Filter by device or MAC..." @bind="SearchQuery" @bind:event="oninput" />
+                                    <button class="btn btn-primary" @onclick="LogSearchPattern">Search</button>
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <select class="form-select form-select-sm" @bind="SelectedCategory">
-                                    <option value="All">All Categories</option>
+                                    <option value="All">All Subsystems</option>
                                     @foreach (var cat in StreamService.ActiveCategoriesSet)
                                     {
                                         <option value="@cat">@cat</option>
@@ -240,8 +240,8 @@ else
                             <div class="col-md-2">
                                 <select class="form-select form-select-sm" @bind="SelectedAlertFilter">
                                     <option value="All">All States</option>
-                                    <option value="Online">Online</option>
-                                    <option value="Faulty">Active Alerts</option>
+                                    <option value="Online">Nominal</option>
+                                    <option value="Faulty">Active Faults</option>
                                 </select>
                             </div>
                         </div>
@@ -250,12 +250,12 @@ else
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>MAC (Key)</th>
-                                    <th>Device</th>
-                                    <th>Live Telemetry Gauge</th>
+                                    <th>MAC Address</th>
+                                    <th>Endpoint</th>
+                                    <th>Live Telemetry</th>
                                     <th>Status</th>
                                     <th>Relay</th>
-                                    <th>Manual Override</th>
+                                    <th>Remote Control</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -302,15 +302,15 @@ else
             </div>
 
             <div class="col-lg-4">
-                <!-- SET 1: ACTIVE ERROR STATES -->
+                <!-- ACTIVE ERROR STATES -->
                 <div class="card shadow-sm mb-3 border-warning">
                     <div class="card-header bg-warning text-dark fw-bold">
-                        ActiveErrorStates (HashSet&lt;string&gt;)
+                        Active Fault Alarms
                     </div>
                     <div class="card-body p-2">
                         @if (StreamService.ActiveErrorStates.Count == 0)
                         {
-                            <p class="text-success small mb-0">No active error states registered.</p>
+                            <p class="text-success small mb-0">No active fault alarms.</p>
                         }
                         else
                         {
@@ -319,7 +319,7 @@ else
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center text-dark fw-semibold">
                                         <code>@err</code>
-                                        <span class="badge bg-warning text-dark">Active Error</span>
+                                        <span class="badge bg-warning text-dark">Active Fault</span>
                                     </li>
                                 }
                             </ul>
@@ -327,15 +327,15 @@ else
                     </div>
                 </div>
 
-                <!-- SET 2: DISCONNECTED NODES -->
+                <!-- DISCONNECTED NODES -->
                 <div class="card shadow-sm mb-3 border-danger">
                     <div class="card-header bg-danger text-white fw-bold">
-                        DisconnectedNodes (HashSet&lt;string&gt;)
+                        Unreachable Endpoints
                     </div>
                     <div class="card-body p-2">
                         @if (StreamService.DisconnectedNodes.Count == 0)
                         {
-                            <p class="text-success small mb-0">No disconnected nodes.</p>
+                            <p class="text-success small mb-0">All registered endpoints reachable.</p>
                         }
                         else
                         {
@@ -344,7 +344,7 @@ else
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center text-danger fw-bold">
                                         <span>@mac</span>
-                                        <span class="badge bg-danger">Unique Set</span>
+                                        <span class="badge bg-danger">Offline</span>
                                     </li>
                                 }
                             </ul>
@@ -352,10 +352,10 @@ else
                     </div>
                 </div>
 
-                <!-- COMPOSITE-KEY SENSORTIMELINE -->
+                <!-- CHRONOLOGICAL EVENT STREAM -->
                 <div class="card shadow-sm">
                     <div class="card-header bg-secondary text-white fw-bold">
-                        SensorTimeline (Key: Time + Sequence)
+                        Chronological Telemetry Feed
                     </div>
                     <div class="card-body p-2" style="max-height: 220px; overflow-y: auto;">
                         <ul class="list-group list-group-flush small">
@@ -412,7 +412,7 @@ else
         if (!string.IsNullOrWhiteSpace(SearchQuery))
         {
             StreamService.RecordUserSearch(SearchQuery);
-            StatusBanner = $"Recorded search '{SearchQuery}' — query frequency counts updated.";
+            StatusBanner = $"Filter logged for '{SearchQuery}'. Operator telemetry preferences updated.";
         }
     }
 
@@ -425,7 +425,7 @@ else
             IsCriticalAlert = false
         };
         await Http.PostAsJsonAsync("/api/stream/simulate", req);
-        StatusBanner = "Typed packet enqueued in TelemetryQueue (FIFO). BackgroundService will process it automatically.";
+        StatusBanner = "Standard telemetry packet dispatched to the ingestion stream.";
     }
 
     private async Task SimulateMoistureDrop()
@@ -437,7 +437,7 @@ else
             IsCriticalAlert = true
         };
         await Http.PostAsJsonAsync("/api/stream/simulate", req);
-        StatusBanner = "Moisture < 20% packet enqueued in CriticalAlertQueue (Priority 1) & ERR_LOW_MOISTURE added to ActiveErrorStates.";
+        StatusBanner = "Critical low-moisture alert dispatched to high-priority queue.";
     }
 
     private async Task SimulatePowerSpike()
@@ -449,7 +449,7 @@ else
             IsCriticalAlert = true
         };
         await Http.PostAsJsonAsync("/api/stream/simulate", req);
-        StatusBanner = "450V surge packet enqueued in CriticalAlertQueue (Priority 1) & ERR_OVERVOLTAGE added to ActiveErrorStates.";
+        StatusBanner = "450V overvoltage alert dispatched to high-priority queue.";
     }
 
     private async Task SimulateDisconnect()
@@ -462,7 +462,7 @@ else
         };
         var res = await Http.PostAsJsonAsync("/api/stream/simulate", req);
         var payload = await res.Content.ReadFromJsonAsync<ApiMessage>();
-        StatusBanner = payload?.Message ?? "Disconnect processed.";
+        StatusBanner = payload?.Message ?? "Node disconnect event processed.";
     }
 
     private async Task SimulateBurstPriorityBypass()
@@ -482,7 +482,7 @@ else
             Reading = 12.8,
             IsCriticalAlert = true
         });
-        StatusBanner = "Queued 3 standard FIFO packets + 1 Priority 1 Critical packet simultaneously! Watch TelemetryQueueWorker empty Priority 1 first.";
+        StatusBanner = "Dispatched 3 standard readings + 1 critical alert simultaneously. Priority worker will preempt normal queue.";
     }
 
     private async Task TriggerOverride(DeviceState device)
@@ -494,14 +494,14 @@ else
             ActionDescription = $"Toggled Relay to {(!device.IsRelayActive ? "ON" : "OFF")}"
         };
         await Http.PostAsJsonAsync("/api/stream/override", cmd);
-        StatusBanner = $"Override executed on {device.DeviceName} and pushed to CommandUndoStack.";
+        StatusBanner = $"Remote override executed on {device.DeviceName}.";
     }
 
     private async Task UndoLastOverride()
     {
         var res = await Http.PostAsync("/api/stream/undo", null);
         var payload = await res.Content.ReadFromJsonAsync<ApiMessage>();
-        StatusBanner = payload?.Message ?? "Undo operation completed safely.";
+        StatusBanner = payload?.Message ?? "Command rollback completed.";
     }
 
     private async Task ExecuteRecommendedAction(PredictiveRecommendation rec)
@@ -513,7 +513,7 @@ else
             ActionDescription = rec.SuggestedCommand
         };
         await Http.PostAsJsonAsync("/api/stream/override", cmd);
-        StatusBanner = $"Executed Suggested Action: '{rec.SuggestedCommand}' on {rec.TargetMac}.";
+        StatusBanner = $"Executed automated action: '{rec.SuggestedCommand}' on {rec.TargetMac}.";
     }
 
     private class ApiMessage
