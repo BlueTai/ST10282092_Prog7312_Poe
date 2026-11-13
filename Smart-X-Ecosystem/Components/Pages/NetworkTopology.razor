@@ -44,7 +44,10 @@ else
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                         <span class="fw-bold">Interactive Self-Healing Mesh Graph (Green = Prim's MST | Amber = Active Multi-Hop Route)</span>
-                        <small class="text-white-50">Click node buttons below to toggle Online/Offline &amp; watch MST heal</small>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="mstToggle" @bind="ShowMstOverlay" />
+                            <label class="form-check-label small text-light" for="mstToggle">Highlight Prim's MST</label>
+                        </div>
                     </div>
                     <div class="card-body">
                         <svg width="100%" height="330" viewBox="0 0 800 330" style="background: #0f172a; border-radius: 0.5rem;">
@@ -53,7 +56,7 @@ else
                                 if (TopologyService.Nodes.TryGetValue(edge.SourceMac, out var s) &&
                                     TopologyService.Nodes.TryGetValue(edge.TargetMac, out var t))
                                 {
-                                    bool isMst = mstEdges.Contains(edge);
+                                    bool isMst = ShowMstOverlay && mstEdges.Contains(edge);
                                     bool isRoute = HighlightedPath.Count > 1 && IsEdgeInPath(edge.SourceMac, edge.TargetMac);
                                     string stroke = isRoute ? "#f59e0b" : isMst ? "#22c55e" : "#334155";
                                     int width = isRoute ? 4 : isMst ? 3 : 1;
@@ -101,7 +104,7 @@ else
             <div class="col-lg-4">
                 <div class="card shadow-sm mb-3">
                     <div class="card-header bg-primary text-white fw-bold">
-                        Self-Healing Multi-Hop Failover Routing
+                        Self-Healing Multi-Hop Failover Simulator
                     </div>
                     <div class="card-body">
                         <div class="mb-2">
@@ -161,42 +164,58 @@ else
             </div>
         </div>
 
-        <!-- HISTORICAL AVL TREE O(log n + k) TIME-WINDOW RANGE QUERY -->
+        <!-- HISTORICAL AVL TREE O(log n + k) TIME-WINDOW RANGE QUERY (INCLUDING 14:00–16:00 WINDOW) -->
         <div class="card shadow-sm">
             <div class="card-header bg-secondary text-white d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span class="fw-bold">
                     🌲 Self-Balancing <code>HistoricalAvlTree</code> — O(log n + k) Time-Window Range Query
                 </span>
-                <div class="d-flex align-items-center gap-2">
-                    <label class="small mb-0">Lookback Window:</label>
-                    <select class="form-select form-select-sm" style="width: auto;" @bind="LookbackMinutes">
-                        <option value="1">Last 1 Minute</option>
-                        <option value="5">Last 5 Minutes</option>
-                        <option value="15">Last 15 Minutes</option>
-                        <option value="60">Last 60 Minutes</option>
-                    </select>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button class="btn btn-sm @(Use14To16Window ? "btn-warning fw-bold" : "btn-outline-light")" @onclick="Query14To16Window">
+                        🕒 Query 14:00 – 16:00 Window
+                    </button>
+                    <button class="btn btn-sm @(!Use14To16Window ? "btn-info fw-bold text-dark" : "btn-outline-light")" @onclick="() => Use14To16Window = false">
+                        🔄 Live Lookback Window
+                    </button>
+                    @if (!Use14To16Window)
+                    {
+                        <select class="form-select form-select-sm" style="width: auto;" @bind="LookbackMinutes">
+                            <option value="5">Last 5 Minutes</option>
+                            <option value="15">Last 15 Minutes</option>
+                            <option value="60">Last 60 Minutes</option>
+                            <option value="1440">All Today (24 Hours)</option>
+                        </select>
+                    }
                 </div>
             </div>
             <div class="card-body p-0">
                 @{
-                    var windowRecords = TopologyService.QueryAvlTimeWindow(DateTime.UtcNow.AddMinutes(-LookbackMinutes), DateTime.UtcNow);
+                    DateTime todayLocal = DateTime.Now.Date;
+                    DateTime startUtc = Use14To16Window
+                        ? DateTime.SpecifyKind(todayLocal.AddHours(14), DateTimeKind.Local).ToUniversalTime()
+                        : DateTime.UtcNow.AddMinutes(-LookbackMinutes);
+                    DateTime endUtc = Use14To16Window
+                        ? DateTime.SpecifyKind(todayLocal.AddHours(16), DateTimeKind.Local).ToUniversalTime()
+                        : DateTime.UtcNow;
+
+                    var windowRecords = TopologyService.QueryAvlTimeWindow(startUtc, endUtc);
                 }
                 @if (windowRecords.Count == 0)
                 {
-                    <p class="text-muted small p-3 mb-0">No AVL telemetry records within the selected time window yet.</p>
+                    <p class="text-muted small p-3 mb-0">No AVL telemetry records within the selected time window.</p>
                 }
                 else
                 {
-                    <div style="max-height: 210px; overflow-y: auto;">
+                    <div style="max-height: 220px; overflow-y: auto;">
                         <table class="table table-sm table-hover align-middle mb-0 small">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Timestamp (UTC)</th>
+                                    <th>Local Timestamp</th>
                                     <th>Seq #</th>
                                     <th>MAC Address</th>
                                     <th>Device Name</th>
                                     <th>Category</th>
-                                    <th>Reading</th>
+                                    <th>Reading (HistoricalReading)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -226,9 +245,11 @@ else
     private List<string> HighlightedPath { get; set; } = new();
     private double RouteCost { get; set; }
     private bool RouteSearched { get; set; }
+    private bool ShowMstOverlay { get; set; } = true;
     private string TraversalMode { get; set; } = "BFS (Breadth-First Search)";
-    private List<MeshNode> TraversalOrder { get; set; } = new();
-    private int LookbackMinutes { get; set; } = 15;
+    private List<MeshVertex> TraversalOrder { get; set; } = new();
+    private int LookbackMinutes { get; set; } = 1440;
+    private bool Use14To16Window { get; set; } = true;
 
     protected override void OnInitialized()
     {
@@ -256,7 +277,7 @@ else
         });
     }
 
-    private void ToggleNodeState(MeshNode node)
+    private void ToggleNodeState(MeshVertex node)
     {
         TopologyService.SetNodeOnlineState(node.MacAddress, !node.IsOnline);
         CalculateShortestRoute();
@@ -280,6 +301,11 @@ else
     {
         TraversalMode = "DFS (Depth-First Search)";
         TraversalOrder = TopologyService.TraverseSubnetDfs(SourceMac);
+    }
+
+    private void Query14To16Window()
+    {
+        Use14To16Window = true;
     }
 
     private bool IsEdgeInPath(string a, string b)

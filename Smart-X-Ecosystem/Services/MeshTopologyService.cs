@@ -14,7 +14,7 @@ namespace Smart_X_Ecosystem.Services
         public event Action? OnTopologyChanged;
 
         // N-ary Hierarchical Tree & Weighted Graph Adjacency List
-        public Dictionary<string, MeshNode> Nodes { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, MeshVertex> Nodes { get; } = new(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, List<MeshEdge>> AdjacencyList { get; } = new(StringComparer.OrdinalIgnoreCase);
         public List<MeshEdge> Edges { get; } = new();
 
@@ -26,20 +26,21 @@ namespace Smart_X_Ecosystem.Services
         public MeshTopologyService()
         {
             SeedDefaultTopology();
+            SeedHistoricalAvlWindow();
         }
 
         private void SeedDefaultTopology()
         {
             var initialNodes = new[]
             {
-                new MeshNode { MacAddress = "00:1B:44:00:00:01", DeviceName = "Core Cloud Gateway", Role = "Root Gateway", Category = "Core", IsOnline = true, X = 400, Y = 50 },
-                new MeshNode { MacAddress = "00:1B:44:00:00:02", DeviceName = "Sector A Mesh Router", Role = "Area Router", Category = "Hydroponics", IsOnline = true, X = 200, Y = 150, ParentMac = "00:1B:44:00:00:01" },
-                new MeshNode { MacAddress = "00:1B:44:00:00:03", DeviceName = "Sector B Grid Router", Role = "Area Router", Category = "Power", IsOnline = true, X = 600, Y = 150, ParentMac = "00:1B:44:00:00:01" },
-                new MeshNode { MacAddress = "00:1B:44:11:3A:B7", DeviceName = "Moisture Sensor B", Role = "Leaf Sensor", Category = "Hydroponics", IsOnline = true, X = 110, Y = 270, ParentMac = "00:1B:44:00:00:02" },
-                new MeshNode { MacAddress = "00:1B:44:11:3A:B8", DeviceName = "Pump A", Role = "Leaf Sensor", Category = "Hydroponics", IsOnline = true, X = 260, Y = 270, ParentMac = "00:1B:44:00:00:02" },
-                new MeshNode { MacAddress = "00:1B:44:11:3A:D9", DeviceName = "Greenhouse HVAC", Role = "Leaf Sensor", Category = "HVAC", IsOnline = true, X = 400, Y = 270, ParentMac = "00:1B:44:00:00:02" },
-                new MeshNode { MacAddress = "00:1B:44:11:3A:C1", DeviceName = "Smart Relay Grid 1", Role = "Leaf Sensor", Category = "Power", IsOnline = true, X = 540, Y = 270, ParentMac = "00:1B:44:00:00:03" },
-                new MeshNode { MacAddress = "00:1B:44:11:3A:C2", DeviceName = "Substation Meter X", Role = "Leaf Sensor", Category = "Power", IsOnline = false, X = 690, Y = 270, ParentMac = "00:1B:44:00:00:03" }
+                new MeshVertex { MacAddress = "00:1B:44:00:00:01", DeviceName = "Core Cloud Gateway", Role = "Root Gateway", Category = "Core", IsOnline = true, X = 400, Y = 50 },
+                new MeshVertex { MacAddress = "00:1B:44:00:00:02", DeviceName = "Sector A Mesh Router", Role = "Area Router", Category = "Hydroponics", IsOnline = true, X = 200, Y = 150, ParentMac = "00:1B:44:00:00:01" },
+                new MeshVertex { MacAddress = "00:1B:44:00:00:03", DeviceName = "Sector B Grid Router", Role = "Area Router", Category = "Power", IsOnline = true, X = 600, Y = 150, ParentMac = "00:1B:44:00:00:01" },
+                new MeshVertex { MacAddress = "00:1B:44:11:3A:B7", DeviceName = "Moisture Sensor B", Role = "Leaf Sensor", Category = "Hydroponics", IsOnline = true, X = 110, Y = 270, ParentMac = "00:1B:44:00:00:02" },
+                new MeshVertex { MacAddress = "00:1B:44:11:3A:B8", DeviceName = "Pump A", Role = "Leaf Sensor", Category = "Hydroponics", IsOnline = true, X = 260, Y = 270, ParentMac = "00:1B:44:00:00:02" },
+                new MeshVertex { MacAddress = "00:1B:44:11:3A:D9", DeviceName = "Greenhouse HVAC", Role = "Leaf Sensor", Category = "HVAC", IsOnline = true, X = 400, Y = 270, ParentMac = "00:1B:44:00:00:02" },
+                new MeshVertex { MacAddress = "00:1B:44:11:3A:C1", DeviceName = "Smart Relay Grid 1", Role = "Leaf Sensor", Category = "Power", IsOnline = true, X = 540, Y = 270, ParentMac = "00:1B:44:00:00:03" },
+                new MeshVertex { MacAddress = "00:1B:44:11:3A:C2", DeviceName = "Substation Meter X", Role = "Leaf Sensor", Category = "Power", IsOnline = false, X = 690, Y = 270, ParentMac = "00:1B:44:00:00:03" }
             };
 
             foreach (var n in initialNodes)
@@ -70,6 +71,37 @@ namespace Smart_X_Ecosystem.Services
             AddLink("00:1B:44:11:3A:B8", "00:1B:44:11:3A:D9", 6.8);
             AddLink("00:1B:44:11:3A:D9", "00:1B:44:11:3A:C1", 7.5);
             AddLink("00:1B:44:11:3A:C1", "00:1B:44:11:3A:C2", 5.9);
+        }
+
+        private void SeedHistoricalAvlWindow()
+        {
+            DateTime todayLocal = DateTime.Now.Date;
+            var samples = new (TimeSpan Time, string Mac, string Name, string Cat, double Val, string Unit)[]
+            {
+                (new TimeSpan(13, 30, 0), "00:1B:44:11:3A:C1", "Smart Relay Grid 1", "Power", 229.8, "V"),
+                (new TimeSpan(14, 05, 0), "00:1B:44:11:3A:B7", "Moisture Sensor B", "Hydroponics", 41.2, "%"),
+                (new TimeSpan(14, 25, 0), "00:1B:44:11:3A:B8", "Pump A", "Hydroponics", 122.5, "L/hr"),
+                (new TimeSpan(14, 50, 0), "00:1B:44:11:3A:D9", "Greenhouse HVAC", "HVAC", 24.6, "°C"),
+                (new TimeSpan(15, 15, 0), "00:1B:44:11:3A:C2", "Substation Meter X", "Power", 412.0, "V"),
+                (new TimeSpan(15, 45, 0), "00:1B:44:11:3A:B7", "Moisture Sensor B", "Hydroponics", 18.4, "%"),
+                (new TimeSpan(16, 30, 0), "00:1B:44:11:3A:C1", "Smart Relay Grid 1", "Power", 231.1, "V")
+            };
+
+            foreach (var s in samples)
+            {
+                long seq = Interlocked.Increment(ref _avlSequence);
+                DateTime utcTime = DateTime.SpecifyKind(todayLocal.Add(s.Time), DateTimeKind.Local).ToUniversalTime();
+                HistoricalAvlTree.Insert(new HistoricalReading
+                {
+                    Timestamp = utcTime,
+                    Sequence = seq,
+                    MacAddress = s.Mac,
+                    DeviceName = s.Name,
+                    Category = s.Cat,
+                    Reading = s.Val,
+                    Unit = s.Unit
+                });
+            }
         }
 
         private void AddLink(string src, string dst, double cost)
@@ -121,7 +153,7 @@ namespace Smart_X_Ecosystem.Services
                         : "00:1B:44:00:00:02";
 
                     int leafIndex = Nodes.Count;
-                    var newNode = new MeshNode
+                    var newNode = new MeshVertex
                     {
                         MacAddress = device.MacAddress,
                         DeviceName = device.DeviceName,
@@ -144,7 +176,7 @@ namespace Smart_X_Ecosystem.Services
                 }
 
                 long seq = Interlocked.Increment(ref _avlSequence);
-                var record = new AvlTelemetryRecord
+                var record = new HistoricalReading
                 {
                     Timestamp = device.LastUpdated,
                     Sequence = seq,
@@ -161,7 +193,7 @@ namespace Smart_X_Ecosystem.Services
             OnTopologyChanged?.Invoke();
         }
 
-        public List<AvlTelemetryRecord> GetAvlInOrderRecords()
+        public List<HistoricalReading> GetAvlInOrderRecords()
         {
             lock (_lock)
             {
@@ -169,7 +201,7 @@ namespace Smart_X_Ecosystem.Services
             }
         }
 
-        public List<AvlTelemetryRecord> QueryAvlTimeWindow(DateTime startUtc, DateTime endUtc)
+        public List<HistoricalReading> QueryAvlTimeWindow(DateTime startUtc, DateTime endUtc)
         {
             lock (_lock)
             {
@@ -178,9 +210,9 @@ namespace Smart_X_Ecosystem.Services
         }
 
         // BFS Subnet Discovery Traversal
-        public List<MeshNode> TraverseSubnetBfs(string startMac)
+        public List<MeshVertex> TraverseSubnetBfs(string startMac)
         {
-            var result = new List<MeshNode>();
+            var result = new List<MeshVertex>();
             lock (_lock)
             {
                 if (!Nodes.ContainsKey(startMac)) return result;
@@ -215,9 +247,9 @@ namespace Smart_X_Ecosystem.Services
         }
 
         // DFS Deep Diagnostic Subnet Traversal
-        public List<MeshNode> TraverseSubnetDfs(string startMac)
+        public List<MeshVertex> TraverseSubnetDfs(string startMac)
         {
-            var result = new List<MeshNode>();
+            var result = new List<MeshVertex>();
             lock (_lock)
             {
                 if (!Nodes.ContainsKey(startMac)) return result;

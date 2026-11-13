@@ -1,86 +1,56 @@
-⚡ Smart-X Enterprise IoT Ecosystem
-Real-Time Command Orchestration & Predictive Telemetry Processing Engine
-Developer: Taahir Basson (ST10282092)
-Tech Stack: C# | .NET 8 | Blazor Web App | Minimal API | Docker
+# Smart-X Industrial IoT Ecosystem (Final PoE — Parts 1, 2 & 3)
 
-1. System Architecture
-The Smart-X IoT Ecosystem is a stateful, high-throughput industrial telemetry platform designed to orchestrate live edge-device data. This repository contains the core stream-processing engine, which utilizes advanced data structures and behavioral algorithms to manage live telemetry, prioritize alerts, and execute real-time hardware commands.
-Secure Zero-Trust Gateway: Secures the platform using the Google Firebase Identity Toolkit REST API, establishing session-based access without relying on hardcoded credentials.
-Real-Time Command Stream: A high-performance processing engine managing live device states, standard telemetry buffering, and critical hardware failures.
-Predictive Action Engine: An automated insight module that cross-references out-of-range sensor data with historical operator interactions to surface proactive command recommendations.
-2. Core Data Structures & Algorithmic Complexity
-To ensure strict O(1) and O(n) performance across the real-time stream, the backend architecture enforces the following dedicated C# collections:
-Instance Name
-Data Structure
-Complexity
-System Implementation
-TelemetryQueue
-Queue<string>
-O(1)
-First-In-First-Out (FIFO) processing of standard incoming edge-node telemetry.
-CriticalAlertQueue
-PriorityQueue<string, int>
-O(n)
-Min-heap priority queue ensuring critical alerts (e.g., voltage spikes) bypass standard telemetry.
-CommandUndoStack
-Stack<OverrideCommand>
-O(1)
-First-In-Last-Out (FILO) manual override history allowing safe, one-click state restoration.
-DeviceRegistry
-Dictionary<string, DeviceState>
-O(1)
-Hash table keyed on MAC addresses for instantaneous telemetry updates and state mutations.
-SensorTimeline
-SortedDictionary<DateTime, string>
-O(n)
-Self-balancing binary search tree keyed on UTC timestamps to strictly order timeline event logs.
-DisconnectedNodes
-HashSet<string>
-O(1)
-Maintains a unique set of faulty MAC addresses to automatically suppress duplicate alert processing.
+**Student Name:** Taahir Basson  
+**Student Number:** ST10282092  
+**Module:** PROG7312 (Advanced Programming & Data Structures)  
+**Framework:** .NET 8.0 Blazor Interactive Server & Minimal REST APIs
 
+---
 
-3. Deployment & Setup
-Firebase Configuration
-Open appsettings.json in the root directory.
-Insert your Firebase Web API Key:
-"Firebase": {
-  "WebApiKey": "YOUR_FIREBASE_WEB_API_KEY_HERE"
-}
-Ensure Email/Password authentication is enabled in your Firebase Console.
-Local Execution (IDE)
-Open Smart-X-Ecosystem.slnx or Smart-X-Ecosystem.csproj in JetBrains Rider or Visual Studio 2022.
-Select the http launch profile.
-Run the application (F5 or Shift+F10). The dashboard will launch at http://localhost:5000.
-Containerized Execution (Docker)
-docker build -t smart-x-ecosystem .
-docker run -p 8080:8080 smart-x-ecosystem
+## 1. Executive Summary & Unified Single-Page Architecture
 
-Navigate to http://localhost:8080 in your browser.
-4. Functional Testing Guide
-Follow these steps to verify the underlying algorithms and stream-processing mechanics:
-A. Secure Authentication
-Launch the application to view the enterprise landing page.
-Enter an email and password in the Operator Portal, then click Create New Operator Account (or Sign In).
-Upon successful REST API authentication, the secure dashboard routing will unlock Modules 1 and 2.
-B. Queue Prioritization (PriorityQueue Bypass)
-Navigate to the Command Stream module.
-Click + Normal Packet twice to load standard telemetry into the FIFO TelemetryQueue.
-Click ⚠️ Moisture Sensor B < 20% to simulate a high-priority environmental failure.
-Click ▶ Dequeue & Process Next Packet.
-Expected Result: The Priority 1 alert explicitly bypasses the standard FIFO queue and processes immediately.
-C. Duplicate Alert Suppression (HashSet)
-Click 🔌 Simulate Disconnect. The target MAC address appears in the active errors panel (DisconnectedNodes).
-Click the simulate button a second time to fire the exact same error.
-Expected Result: The HashSet.Add() method rejects the duplicate in O(1) time, suppressing the warning and preventing operator UI fatigue.
-D. Safe State Restoration (Stack)
-In the live device table, click Toggle Relay on any online device. The action is executed and pushed onto the CommandUndoStack.
-Click ↩ Undo Last Command in the top right panel.
-Expected Result: The previous hardware state is popped from the FILO stack and instantly restored on the grid.
-E. Predictive Action Engine (Behavioral Co-occurrence)
-Search for Pump A in the dictionary search bar and click Record Search.
-Trigger the ⚠️ Moisture Sensor B < 20% anomaly using the simulator buttons.
-Expected Result: The engine mathematically analyzes the out-of-range telemetry against recorded operator workflows and proactively generates an Automated Insight card, suggesting you activate Water Pump A.
-5. References
-Jamro, M., 2018. C# data structures and algorithms. Birmingham: Packt Publishing.
-Nakov, S., Kolev, V. et al., 2013. Fundamentals of computer programming with C#. Sofia: Telerik Software Academy.
+The **Smart-X Ecosystem** is an enterprise-grade Industrial IoT (IIoT) telemetry ingestion, real-time command orchestration, and self-healing mesh routing platform.
+
+To ensure **zero state loss** across modules, the application registers all state engines (`IngestionEngine`, `CommandStreamService`, `MeshTopologyService`, and `FirebaseAuthService`) as **DI Singletons** and features a **Unified Single-Page Stateful Pillar Switcher** on `Home.razor` (alongside direct routes `/ingestion`, `/command-stream`, and `/topology`).
+
+---
+
+## 2. Pillar Breakdown & Advanced Data Structures
+
+### Pillar 1: Sensor Data Ingestion & Security (`Ingestion.razor`)
+- **Generic Telemetry Payloads (`TelemetryPacket<T>`):** Strongly-typed generic packets with regex MAC validation and required field enforcement.
+- **Operator Overloading (`PowerMetric`):** Custom `struct` overloading `+`, `>`, and `<` for direct wattage/kilowatt aggregation and threshold comparison.
+- **Jagged Array Burst Buffering (`double[][]`):** High-throughput burst buffering inside `IngestionEngine.cs`.
+- **Recursive Security Tree (`DeploymentNode`):** N-ary recursive configuration validation (`ValidateConfigurationTree()`).
+- **Batch `.txt` Provisioning & AES-256 Encryption (`POST /api/upload`):** Extracts comma-separated IoT devices from `devices.txt` directly into `DeviceRegistry`, `TelemetryQueue`, and `MeshTopologyService` (`HistoricalAvlTree`), while writing an AES-256 encrypted `.enc` archive to `EncryptedLogs/`.
+
+### Pillar 2: Real-Time Command Stream & Predictive Engine (`CommandStream.razor`)
+- **Typed Packet Queues (`Queue<QueuedTelemetryPacket>` & `PriorityQueue<QueuedTelemetryPacket, int>`):** Every queued item is a strongly-typed `QueuedTelemetryPacket` carrying `MacAddress`, `DeviceName`, `Category`, `Value`, `Unit`, `Priority`, and `Timestamp`.
+- **Automated Background Worker (`TelemetryQueueWorker : BackgroundService`):** Runs continuously on a `1.5s` `PeriodicTimer` and **always drains `CriticalAlertQueue` (Priority 1) completely** before dequeuing standard packets from `TelemetryQueue` (FIFO).
+- **LIFO Undo Stack (`Stack<OverrideCommand>`):** Stores operator manual overrides (`CommandUndoStack`) with instant 1-click state rollback.
+- **$O(1)$ Device Registry (`Dictionary<string, DeviceState>`):** Case-insensitive MAC address lookup table with real-time Bootstrap progress gauges.
+- **Composite-Key Chronological Timeline (`SortedDictionary<TimelineKey, TimelineEntry>`):** Keyed by `TimelineKey` (`DateTime Timestamp` + thread-safe monotonic `long Sequence` via `Interlocked.Increment`) so simultaneous readings never overwrite each other. Powers the live **SVG Telemetry Line Chart**.
+- **Dual Unique Sets (`HashSet<string>`):**
+  - `DisconnectedNodes`: Suppresses duplicate disconnect alerts.
+  - `ActiveErrorStates`: Tracks active fault codes (`ERR_OVERVOLTAGE`, `ERR_LOW_MOISTURE`, `ERR_NODE_OFFLINE`).
+- **Count-Computed Predictive Recommendation Engine:** Every recommendation's `ConfidencePercentage` (`double`) is dynamically computed strictly from runtime observation counts (`MatchedCount / TotalObservations * 100.0`).
+
+### Pillar 3: Network Topology & Self-Healing Mesh (`NetworkTopology.razor`)
+- **Weighted Graph Adjacency List (`Dictionary<string, List<MeshEdge>>`):** Models physical & wireless ESP32 mesh links with latency/cost weights.
+- **BFS & DFS Subnet Traversals:** Breadth-First Search (`Queue<string>`) and Depth-First Search (`Stack<string>`) subnet discovery across online mesh vertices (`MeshVertex`).
+- **Prim's Minimum Spanning Tree (`BinaryMinHeap<MeshEdge>`):** Custom generic binary min-heap computing the lowest-cost backbone spanning all active nodes in real time.
+- **Self-Healing Multi-Hop Failover Simulator:** Interactive node online/offline toggles that dynamically reroute packets around failed routers/nodes.
+- **Self-Balancing AVL Tree (`HistoricalAvlTree`):** Supports $O(\log n)$ insertions with automatic left/right tree rotations (`RotateLeft`, `RotateRight`) and $O(\log n + k)$ time-window range queries (`QueryTimeWindow`), including the **14:00 – 16:00** historical inspection window.
+
+---
+
+## 3. Running the Solution
+
+### Local Execution (.NET 8 CLI / JetBrains Rider / Visual Studio)
+```bash
+cd Smart-X-Ecosystem
+dotnet run --launch-profile http
+```
+Open **`http://localhost:5000`** in your browser.
+- Sign in using the **Firebase Operator Portal** (or click **Instant Demo Operator Login** to authenticate `testoperator@smartx.io` against Google Firebase Identity Toolkit REST API).
+- Upload `devices.txt` in **Pillar 1** to test batch provisioning and AES-256 archiving.

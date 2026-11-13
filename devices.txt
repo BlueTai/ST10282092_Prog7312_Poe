@@ -1,0 +1,7 @@
+# Smart-X Industrial IoT Batch Device Provisioning File
+# Format: MAC,DeviceName,Category,Reading,Unit
+00:1B:44:99:AA:01,Nutrient Dosing Pump,Hydroponics,78.5,%
+00:1B:44:99:AA:02,Solar Inverter B,Power,242.0,V
+00:1B:44:99:AA:03,Cooling Fan Array,HVAC,19.5,°C
+00:1B:44:99:AA:04,Substation Transformer Z,Power,410.2,V
+00:1B:44:99:AA:05,Root Zone Moisture Probe,Hydroponics,16.8,%

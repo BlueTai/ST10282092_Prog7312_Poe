@@ -16,11 +16,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="40aa5b2c-bed6-43a0-9382-494d1bb60f18" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Smart-X-Ecosystem/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Smart-X-Ecosystem/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Components/App.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/App.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Layout/NavMenu.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Components/Pages/Home.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/Home.razor" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/FirebaseAuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/FirebaseAuthService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Components/Pages/NetworkTopology.razor" beforeDir="false" afterPath="$PROJECT_DIR$/Components/Pages/NetworkTopology.razor" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/TopologyModels.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/TopologyModels.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Services/MeshTopologyService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/MeshTopologyService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Smart-X-Ecosystem.csproj.user" beforeDir="false" afterPath="$PROJECT_DIR$/Smart-X-Ecosystem.csproj.user" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.dll" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.exe" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/bin/Debug/net8.0/Smart-X-Ecosystem.pdb" afterDir="false" />
@@ -35,6 +36,10 @@
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rjsmrazor.dswa.cache.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/rpswa.dswa.cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/rpswa.dswa.cache.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.packagespec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.model.nuget.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/obj/rider.project.restore.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../smart_x_technical_readme (2).md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,23 +86,23 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.000000004796304" />
-      <entry key="MS500" value="1.029013065760738" />
-      <entry key="S2" value="2.102523697483952" />
-      <entry key="S5" value="4.141688865808025" />
-      <entry key="S10" value="5.6421457477586126" />
-      <entry key="S30" value="7.090938725256919" />
-      <entry key="S60" value="7.537119908713194" />
-      <entry key="M2" value="8.242327628263357" />
-      <entry key="M5" value="13.166981215200792" />
-      <entry key="M10" value="20.009681298324168" />
-      <entry key="M15" value="25.1270820746596" />
-      <entry key="M30" value="38.54195288733215" />
-      <entry key="H1" value="57.439580860972136" />
-      <entry key="H2" value="75.49626819081715" />
-      <entry key="H4" value="88.39418912618294" />
-      <entry key="D1" value="101.9277444931874" />
-      <entry key="W1" value="104.55293624148877" />
+      <entry key="MS100" value="1.0002527505306469" />
+      <entry key="MS500" value="1.2033962815031949" />
+      <entry key="S2" value="2.280924545331933" />
+      <entry key="S5" value="4.554450391205702" />
+      <entry key="S10" value="7.131019897047221" />
+      <entry key="S30" value="10.461926709524207" />
+      <entry key="S60" value="11.646243083991001" />
+      <entry key="M2" value="12.754409943683735" />
+      <entry key="M5" value="17.87696506141616" />
+      <entry key="M10" value="24.799638318220186" />
+      <entry key="M15" value="29.95469256854244" />
+      <entry key="M30" value="43.4134248226095" />
+      <entry key="H1" value="62.34551957956035" />
+      <entry key="H2" value="80.43500182033075" />
+      <entry key="H4" value="93.35847120347691" />
+      <entry key="D1" value="106.9209022162618" />
+      <entry key="W1" value="109.551934129172" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -119,23 +124,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.9460576512945383" />
-      <entry key="MS500" value="1.017684379450607" />
-      <entry key="S2" value="2.096685054682902" />
-      <entry key="S5" value="4.136982480492071" />
-      <entry key="S10" value="5.638906501605804" />
-      <entry key="S30" value="7.0895717158684" />
-      <entry key="S60" value="7.5363919007008615" />
-      <entry key="M2" value="8.241925650202173" />
-      <entry key="M5" value="13.166710855761925" />
-      <entry key="M10" value="20.009468214652514" />
-      <entry key="M15" value="25.126896945992616" />
-      <entry key="M30" value="38.54179428251365" />
-      <entry key="H1" value="57.43945001641854" />
-      <entry key="H2" value="75.49617704929086" />
-      <entry key="H4" value="88.39413418835926" />
-      <entry key="D1" value="101.92773368004929" />
-      <entry key="W1" value="104.5529346505825" />
+      <entry key="MS100" value="0.9140469541674882" />
+      <entry key="MS500" value="1.1792975958807816" />
+      <entry key="S2" value="2.2600851238651267" />
+      <entry key="S5" value="4.528277872496509" />
+      <entry key="S10" value="7.109668020930891" />
+      <entry key="S30" value="10.451808833087833" />
+      <entry key="S60" value="11.640701105065967" />
+      <entry key="M2" value="12.751483355004114" />
+      <entry key="M5" value="17.875656783804036" />
+      <entry key="M10" value="24.79890138487624" />
+      <entry key="M15" value="29.954157057694193" />
+      <entry key="M30" value="43.413090454924465" />
+      <entry key="H1" value="62.345300687481945" />
+      <entry key="H2" value="80.43486659313938" />
+      <entry key="H4" value="93.35839420089718" />
+      <entry key="D1" value="106.92088772170233" />
+      <entry key="W1" value="109.55193201223584" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

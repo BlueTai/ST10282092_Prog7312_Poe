@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Smart_X_Ecosystem.Models
 {
-    public class MeshNode
+    public class MeshVertex
     {
         public string MacAddress { get; set; } = string.Empty;
         public string DeviceName { get; set; } = string.Empty;
@@ -15,6 +15,9 @@ namespace Smart_X_Ecosystem.Models
         public string? ParentMac { get; set; }
         public List<string> ChildMacs { get; set; } = new();
     }
+
+    // Alias for backwards compatibility
+    public class MeshNode : MeshVertex { }
 
     public class MeshEdge : IComparable<MeshEdge>
     {
@@ -80,7 +83,7 @@ namespace Smart_X_Ecosystem.Models
         }
     }
 
-    public class AvlTelemetryRecord : IComparable<AvlTelemetryRecord>
+    public class HistoricalReading : IComparable<HistoricalReading>
     {
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public long Sequence { get; set; }
@@ -90,7 +93,7 @@ namespace Smart_X_Ecosystem.Models
         public double Reading { get; set; }
         public string Unit { get; set; } = string.Empty;
 
-        public int CompareTo(AvlTelemetryRecord? other)
+        public int CompareTo(HistoricalReading? other)
         {
             if (other == null) return 1;
             int cmp = Timestamp.CompareTo(other.Timestamp);
@@ -103,12 +106,12 @@ namespace Smart_X_Ecosystem.Models
 
     public class AvlNode
     {
-        public AvlTelemetryRecord Data { get; set; }
+        public HistoricalReading Data { get; set; }
         public AvlNode? Left { get; set; }
         public AvlNode? Right { get; set; }
         public int Height { get; set; } = 1;
 
-        public AvlNode(AvlTelemetryRecord data)
+        public AvlNode(HistoricalReading data)
         {
             Data = data;
         }
@@ -129,7 +132,7 @@ namespace Smart_X_Ecosystem.Models
 
         private static int GetBalance(AvlNode? node) => node == null ? 0 : GetHeight(node.Left) - GetHeight(node.Right);
 
-        public void Insert(AvlTelemetryRecord record)
+        public void Insert(HistoricalReading record)
         {
             Root = InsertNode(Root, record);
             Count++;
@@ -163,7 +166,7 @@ namespace Smart_X_Ecosystem.Models
             return y;
         }
 
-        private AvlNode InsertNode(AvlNode? node, AvlTelemetryRecord data)
+        private AvlNode InsertNode(AvlNode? node, HistoricalReading data)
         {
             if (node == null) return new AvlNode(data);
 
@@ -199,14 +202,29 @@ namespace Smart_X_Ecosystem.Models
             return node;
         }
 
-        public List<AvlTelemetryRecord> QueryTimeWindow(DateTime startUtc, DateTime endUtc)
+        public List<HistoricalReading> QueryTimeWindow(DateTime startUtc, DateTime endUtc)
         {
-            var results = new List<AvlTelemetryRecord>();
+            var results = new List<HistoricalReading>();
             RangeSearch(Root, startUtc, endUtc, results);
             return results;
         }
 
-        private void RangeSearch(AvlNode? node, DateTime startUtc, DateTime endUtc, List<AvlTelemetryRecord> results)
+        public List<HistoricalReading> QueryByTimeOfDayRange(TimeSpan startTime, TimeSpan endTime)
+        {
+            var results = new List<HistoricalReading>();
+            var all = GetInOrderRecords();
+            foreach (var rec in all)
+            {
+                var localTod = rec.Timestamp.ToLocalTime().TimeOfDay;
+                if (localTod >= startTime && localTod <= endTime)
+                {
+                    results.Add(rec);
+                }
+            }
+            return results;
+        }
+
+        private void RangeSearch(AvlNode? node, DateTime startUtc, DateTime endUtc, List<HistoricalReading> results)
         {
             if (node == null) return;
 
@@ -226,14 +244,14 @@ namespace Smart_X_Ecosystem.Models
             }
         }
 
-        public List<AvlTelemetryRecord> GetInOrderRecords()
+        public List<HistoricalReading> GetInOrderRecords()
         {
-            var list = new List<AvlTelemetryRecord>();
+            var list = new List<HistoricalReading>();
             InOrderTraversal(Root, list);
             return list;
         }
 
-        private void InOrderTraversal(AvlNode? node, List<AvlTelemetryRecord> result)
+        private void InOrderTraversal(AvlNode? node, List<HistoricalReading> result)
         {
             if (node == null) return;
             InOrderTraversal(node.Left, result);
